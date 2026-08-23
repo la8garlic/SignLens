@@ -40,7 +40,9 @@ class PlayerSessionTest {
                         view.worldId(), 1, 2, 3)),
                 START.plusMillis(100)
         );
-        session.renderPolicy().observe(java.util.Optional.of(Component.text("shown")), true, START);
+        session.renderPolicy().observe(java.util.Optional.of(
+                new io.github.la8garlic.signlens.render.FormattedContent(
+                        java.util.List.of(Component.text("shown")))), true, START);
 
         assertEquals(RenderDecisionType.CLEAR, session.reset().type());
         assertEquals(FocusState.IDLE, session.focusController().state());

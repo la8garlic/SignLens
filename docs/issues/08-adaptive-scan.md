@@ -23,7 +23,7 @@ Child of Issue 01; integrates Issues 02, 04, 06, and 07 into the first runtime l
 - Nearby block scans.
 - Global sign cache.
 - Per-tick ActionBar sends.
-- Performance release sign-off; that is Issue 10.
+- Performance release sign-off; that is Issue 11.
 
 ## Acceptance criteria
 

@@ -32,6 +32,7 @@ signlens
 │   ├── ActionBarRenderer
 │   ├── ComponentSanitizer
 │   ├── ContentFormatter
+│   ├── FormattedContent
 │   └── RenderPolicy
 ├── session
 │   ├── PlayerSession
@@ -68,7 +69,7 @@ Forbidden dependencies:
 - `PlayerSession -> Bukkit scheduler`
 - domain formatting code -> live Bukkit `Sign` or `Block`
 
-The `SignSnapshot` boundary is important: after reading, rendering and formatting operate on immutable project-owned data.
+The `SignSnapshot` boundary is important: after reading, rendering and formatting operate on immutable project-owned data. `FormattedContent` keeps the individual lines available until the selected renderer projects them onto its output surface.
 
 ## Detection
 
@@ -128,7 +129,7 @@ The reader must support standing, wall, hanging, and wall-hanging signs, includi
 
 Sign text is Adventure `Component` data. Formatting must not be flattened through `Component#toString()` or by serializing everything to plain text.
 
-`ComponentSanitizer` should preserve presentation properties such as text, color, bold, italic, underlining, strikethrough, obfuscation policy, and font where supported. It should remove or deliberately neutralize interaction metadata such as click events, hover events, and insertion. SignLens is a reading layer, so its contract is:
+`ComponentSanitizer` should preserve presentation properties such as text, color, bold, italic, underlining, strikethrough, obfuscation policy, and font where supported. It should remove or deliberately neutralize interaction metadata such as click events, hover events, and insertion. The formatter must also preserve line boundaries between meaningful sign lines. SignLens is a reading layer, so its contract is:
 
 > Preserve presentation, not interaction.
 
@@ -141,7 +142,12 @@ interface SignRenderer {
 }
 ```
 
-`ActionBarRenderer` is the 0.1 implementation. It receives already-formatted content and knows nothing about ray tracing or focus timing.
+`ActionBarRenderer` is the 0.1 implementation. It receives line-aware
+`FormattedContent` and knows nothing about ray tracing or focus timing. Because
+the native ActionBar is a single-line surface, it renders line boundaries as a
+visible `↵` marker; it must never send a raw newline component. A future Dialog
+renderer can consume the same line list without changing detection, reading, or
+focus logic.
 
 Rendering is edge-triggered:
 

@@ -6,7 +6,7 @@
 
 ## Relationship
 
-Final acceptance child of Issue 01; validates the integrated runtime from Issues 02–09.
+Final acceptance child of Issue 01; validates the integrated runtime from Issues 02–10.
 
 ## Scope
 

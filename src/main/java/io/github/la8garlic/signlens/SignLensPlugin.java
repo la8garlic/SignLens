@@ -50,7 +50,6 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
         detector = new RayTraceSignDetector(scanSettings.maxDistance());
         reader = new PaperSignReader();
         formatter = new ContentFormatter(
-                getConfig().getString("render.separator", ContentFormatter.DEFAULT_SEPARATOR),
                 getConfig().getInt("render.soft-limit", ContentFormatter.DEFAULT_SOFT_LIMIT),
                 getConfig().getInt("render.max-length", ContentFormatter.DEFAULT_HARD_LIMIT)
         );

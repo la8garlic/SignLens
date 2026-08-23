@@ -12,7 +12,6 @@ focus:
 
 render:
   mode: action-bar
-  separator: " · "
   soft-limit: 96
   max-length: 120
   keepalive-millis: 2500

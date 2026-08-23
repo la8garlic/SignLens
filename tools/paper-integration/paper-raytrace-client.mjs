@@ -15,6 +15,13 @@ const client = mc.createClient({
     auth: "offline",
 });
 
+const actionBarPackets = [];
+client.on("packet", (data, meta) => {
+    if (meta.name === "action_bar") {
+        actionBarPackets.push(JSON.stringify(data));
+    }
+});
+
 const timeout = setTimeout(() => {
     client.end("integration timeout");
     process.exitCode = 1;
@@ -23,6 +30,16 @@ const timeout = setTimeout(() => {
 client.once("login", () => {
     console.log("Connected to Paper 26.2 as SignLensProbe");
     setTimeout(() => {
+        const multilinePacket = actionBarPackets.find(packet =>
+            packet.includes("123") && packet.includes("456") && packet.includes("↵")
+                && !packet.includes("\\n")
+        );
+        if (!multilinePacket) {
+            console.error("No ActionBar-safe 123↵456 packet was observed");
+            process.exitCode = 1;
+        } else {
+            console.log("Observed ActionBar-safe 123↵456 packet");
+        }
         clearTimeout(timeout);
         client.end("integration probe complete");
     }, 8_000);

@@ -14,6 +14,7 @@ import io.github.la8garlic.signlens.reading.SignKey;
 import io.github.la8garlic.signlens.reading.SignReader;
 import io.github.la8garlic.signlens.reading.SignSnapshot;
 import io.github.la8garlic.signlens.render.ContentFormatter;
+import io.github.la8garlic.signlens.render.FormattedContent;
 import io.github.la8garlic.signlens.render.SignRenderer;
 import io.github.la8garlic.signlens.session.PlayerSession;
 import java.time.Clock;
@@ -77,7 +78,7 @@ class PlayerScanTaskTest {
                 session,
                 detector,
                 reader,
-                new ContentFormatter(" · ", 96, 120),
+                new ContentFormatter(96, 120),
                 renderer,
                 new ScanSettings(8, 2, 10, 0.02, 1.0f),
                 () -> true,
@@ -92,7 +93,7 @@ class PlayerScanTaskTest {
 
         verify(detector, times(2)).detect(player);
         verify(reader).read(player, detectedSign);
-        verify(renderer).show(player, Component.text("Hello"));
+        verify(renderer).show(player, new FormattedContent(List.of(Component.text("Hello"))));
         assertTrue(session.renderPolicy().lastSentContent().isPresent());
     }
 

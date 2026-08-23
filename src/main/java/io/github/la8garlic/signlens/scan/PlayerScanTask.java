@@ -9,6 +9,7 @@ import io.github.la8garlic.signlens.focus.FocusState;
 import io.github.la8garlic.signlens.reading.SignReader;
 import io.github.la8garlic.signlens.reading.SignSnapshot;
 import io.github.la8garlic.signlens.render.ContentFormatter;
+import io.github.la8garlic.signlens.render.FormattedContent;
 import io.github.la8garlic.signlens.render.RenderDecision;
 import io.github.la8garlic.signlens.render.RenderDecisionType;
 import io.github.la8garlic.signlens.render.SignRenderer;
@@ -20,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -154,7 +154,7 @@ public final class PlayerScanTask {
 
         SignSnapshot value = snapshot.orElseThrow();
         session.lastSnapshot(value);
-        Optional<Component> formatted = formatter.format(value);
+        Optional<FormattedContent> formatted = formatter.format(value);
         apply(session.renderPolicy().observe(formatted, true, now));
     }
 
