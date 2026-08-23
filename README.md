@@ -21,6 +21,24 @@ The first release is intentionally a passive reader:
 
 Dialog/deep-reading gestures are explicitly deferred to 0.2.
 
+## Development
+
+Requirements: Java 25 or newer and no separately installed Gradle is needed.
+
+On Windows:
+
+```powershell
+./gradlew.bat clean build
+```
+
+On macOS/Linux:
+
+```bash
+./gradlew clean build
+```
+
+The plugin JAR is written to `build/libs/SignLens-0.1.0.jar`.
+
 ## Runtime flow
 
 ```text
@@ -99,7 +117,7 @@ signlens.command.debug
 
 ## Project status
 
-This repository currently contains the 0.1 engineering specification and issue decomposition. Runtime implementation has not yet started. See:
+This repository contains the 0.1 engineering specification and a locally validated Issue 01 Paper/Java bootstrap. Sign-reading runtime behavior is intentionally still deferred to Issues 02–10. See:
 
 - [Architecture](docs/architecture.md)
 - [UX contract](docs/ux.md)

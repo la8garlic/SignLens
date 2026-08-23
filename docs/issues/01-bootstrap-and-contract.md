@@ -29,11 +29,11 @@ Create the initial Gradle project and plugin descriptor for Paper 26.2 / Java 25
 
 ## Acceptance criteria
 
-- [ ] The project builds on Java 25.
-- [ ] Paper 26.2 is the explicit first target.
-- [ ] A clean Paper server loads the plugin without warnings caused by SignLens.
-- [ ] The plugin descriptor declares the main class, version, permissions, and command contract.
-- [ ] The four 0.1 ADRs and architecture boundaries are present.
+- [x] The project builds on Java 25.
+- [x] Paper 26.2 is the explicit first target.
+- [x] A clean Paper server loads the plugin without warnings caused by SignLens.
+- [x] The plugin descriptor declares the main class, version, permissions, and command contract.
+- [x] The four 0.1 ADRs and architecture boundaries are present.
 - [ ] The following child slices are linked when remote Issues are created:
   - [ ] Detection abstraction
   - [ ] Sign side/content reader
@@ -44,6 +44,14 @@ Create the initial Gradle project and plugin descriptor for Paper 26.2 / Java 25
   - [ ] Adaptive scan
   - [ ] Debug command
   - [ ] Performance validation
+
+## Verification evidence
+
+- `.\gradlew.bat clean build --console=plain --no-daemon` passed on Java 25.
+- `SignLens-0.1.0.jar` loaded on a clean Paper 26.2 build 112 server.
+- The server reached `Done`, logged `SignLens 0.1.0 enabled.`, and generated the default plugin configuration.
+- No SignLens-specific error, exception, or failed-load message was present in the startup log.
+- The EULA warning in the smoke log came from the explicitly supplied Paper test flag and is unrelated to SignLens.
 
 ## Compatibility and safety
 
