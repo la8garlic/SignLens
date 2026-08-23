@@ -153,6 +153,24 @@ measured Paper performance validation. See:
 - [Issue series](docs/issues/)
 - [Changelog](CHANGELOG.md)
 
+## 0.1.0 release validation
+
+The final release candidate was validated on Paper 26.2 build 112 with Java
+25. The real integration probe passed all four sign shapes, both reading
+boundaries, distance and non-sign cases, and the complete runtime pipeline.
+The 20-client performance smoke test also passed with 1,000 scans, 400 ray
+traces, 600 adaptive skips, and zero ActionBar sends in the miss-only run.
+
+The final in-game preview confirms that a sign written as `123` followed by
+`456` is presented in the native ActionBar as `123↵456`, without the former
+replacement glyph:
+
+![Paper 26.2 manual validation showing the visible line-break marker](docs/issues/assets/issue-20-actionbar-final.png)
+
+The detailed measurements and reproducible commands are in
+[docs/performance.md](docs/performance.md). The screenshot is the maintainer's
+manual Paper validation evidence for the line-preservation acceptance case.
+
 ## Known limitations
 
 - The native ActionBar is one row. Sign line boundaries are shown with `↵`;

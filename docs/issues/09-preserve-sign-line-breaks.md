@@ -43,10 +43,10 @@ verification describe the actual viewer-facing output.
       two lines or dropping a line boundary unexpectedly.
 - [x] Unit tests cover one-line, multi-line, empty-line, styled, and truncated
       content cases.
-- [ ] Manual Paper verification confirms the local preview visibly renders
+- [x] Manual Paper verification confirms the local preview visibly renders
       `123↵456` without the replacement glyph. Automated Paper verification
       already confirms the runtime packet contains `123↵456` and no raw
-      newline.
+      newline; the maintainer also confirmed the final in-game preview.
 
 ## Verification
 
@@ -55,3 +55,5 @@ documentation, run the formatter and integration test suites, and verify the
 result in the local Paper preview with a sign containing at least two distinct
 lines. The 0.1 acceptance representation is `123↵456`; exact stacked rows are
 reserved for the future Dialog renderer.
+
+![Paper 26.2 manual validation showing the visible line-break marker](assets/issue-20-actionbar-final.png)
