@@ -3,6 +3,8 @@ enabled: true
 detection:
   max-distance: 8.0
   scan-period-ticks: 2
+  position-threshold: 0.02
+  rotation-threshold-degrees: 1.0
 
 focus:
   dwell-millis: 200
@@ -11,6 +13,7 @@ focus:
 render:
   mode: action-bar
   separator: " · "
+  soft-limit: 96
   max-length: 120
   keepalive-millis: 2500
 
