@@ -12,3 +12,4 @@ eula.txt
 # Local machine files
 .env
 *.local
+node_modules/

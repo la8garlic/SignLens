@@ -1,0 +1,7 @@
+name: SignLensIntegrationProbe
+version: '0.1.0'
+main: io.github.la8garlic.signlens.integration.RayTraceIntegrationProbe
+description: Test-only real Paper ray-trace probe.
+api-version: '26.2'
+depend:
+  - SignLens

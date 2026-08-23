@@ -35,4 +35,4 @@ Child of Issue 01. Establishes the first boundary in `Detector -> FocusControlle
 
 ## Verification
 
-Unit-test the value boundary and use a Paper integration test for block ray tracing and collision behavior. Record any chunk-load observation for Issue 10.
+Unit-test the value boundary and run `tools/run-paper-raytrace-integration.ps1` for block ray tracing and collision behavior against a real Paper 26.2 server. The harness connects a protocol client in offline mode, creates an actual server-side player, and records the detector result. Record any chunk-load observation for Issue 10.
