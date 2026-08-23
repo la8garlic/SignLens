@@ -1,0 +1,14 @@
+.gradle/
+build/
+out/
+.idea/
+*.iml
+
+# Local server/runtime files
+run/
+logs/
+eula.txt
+
+# Local machine files
+.env
+*.local

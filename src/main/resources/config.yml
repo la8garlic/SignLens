@@ -1,0 +1,21 @@
+enabled: true
+
+detection:
+  max-distance: 8.0
+  scan-period-ticks: 2
+
+focus:
+  dwell-millis: 200
+  lost-grace-millis: 300
+
+render:
+  mode: action-bar
+  separator: " · "
+  max-length: 120
+  keepalive-millis: 2500
+
+performance:
+  idle-probe-ticks: 10
+
+debug:
+  enabled: false
