@@ -40,7 +40,9 @@ signlens
 ├── scheduler
 │   └── PlayerScanTask
 ├── command
-│   └── SignLensCommand
+│   ├── SignLensCommand
+│   ├── DebugSnapshot
+│   └── DebugMessageFormatter
 ├── config
 │   └── SignLensConfig
 └── metrics
@@ -223,7 +225,16 @@ Disabling the plugin must leave no world-side artifact.
 
 ## Observability
 
-`/signlens debug` should expose the current session rather than merely acknowledge the command. At minimum it should show state, target key/side, distance, dwell, last ray-trace age, render age, line count, and visual character count. Debug output must be rate-limited or on-demand and must not itself create a per-tick ActionBar stream.
+`/signlens debug` exposes the current session rather than merely acknowledging
+the command. It shows state, target key/side, distance, dwell, last ray-trace
+age, average ray-trace time, render age, line count, visual character count,
+and local counters. Permission is checked before session lookup, output is
+sent only to the command sender, and the command is on-demand so it cannot
+create a per-tick ActionBar stream. `debug.enabled` is the configuration gate.
+
+`PerformanceCounters` is local and resettable. It records skipped scans, idle
+probes, ray-trace hits/misses and duration, snapshot/formatter work, and
+ActionBar sends/clears for Issue 11 validation.
 
 ## Testing boundary
 

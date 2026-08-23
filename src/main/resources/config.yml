@@ -20,4 +20,4 @@ performance:
   idle-probe-ticks: 10
 
 debug:
-  enabled: false
+  enabled: true

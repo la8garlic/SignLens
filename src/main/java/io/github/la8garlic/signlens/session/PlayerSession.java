@@ -6,7 +6,9 @@ import io.github.la8garlic.signlens.render.RenderDecision;
 import io.github.la8garlic.signlens.render.RenderPolicy;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.UUID;
+import java.time.Instant;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 /** Per-player state holder; behavior remains in the focus and render controllers. */
@@ -18,6 +20,9 @@ public final class PlayerSession {
     private ViewSample lastView;
     private SignSnapshot lastSnapshot;
     private ScheduledTask scanTask;
+    private Instant lastRayTraceAt;
+    private long lastRayTraceNanos;
+    private OptionalDouble lastDistance = OptionalDouble.empty();
 
     public PlayerSession(UUID playerId) {
         this(playerId, new FocusController(), new RenderPolicy());
@@ -65,6 +70,29 @@ public final class PlayerSession {
         lastSnapshot = null;
     }
 
+    public Optional<Instant> lastRayTraceAt() {
+        return Optional.ofNullable(lastRayTraceAt);
+    }
+
+    public long lastRayTraceNanos() {
+        return lastRayTraceNanos;
+    }
+
+    public OptionalDouble lastDistance() {
+        return lastDistance;
+    }
+
+    public void recordRayTrace(Instant at, long durationNanos, OptionalDouble distance) {
+        Objects.requireNonNull(at, "at");
+        Objects.requireNonNull(distance, "distance");
+        if (durationNanos < 0) {
+            throw new IllegalArgumentException("durationNanos must not be negative");
+        }
+        lastRayTraceAt = at;
+        lastRayTraceNanos = durationNanos;
+        lastDistance = distance;
+    }
+
     public Optional<ScheduledTask> scanTask() {
         return Optional.ofNullable(scanTask);
     }
@@ -93,6 +121,9 @@ public final class PlayerSession {
         focusController.reset();
         clearLastView();
         clearLastSnapshot();
+        lastRayTraceAt = null;
+        lastRayTraceNanos = 0L;
+        lastDistance = OptionalDouble.empty();
         return renderPolicy.reset();
     }
 }

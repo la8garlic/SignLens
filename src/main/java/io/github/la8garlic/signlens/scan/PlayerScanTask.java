@@ -6,6 +6,7 @@ import io.github.la8garlic.signlens.focus.FocusController;
 import io.github.la8garlic.signlens.focus.FocusTarget;
 import io.github.la8garlic.signlens.focus.FocusTransition;
 import io.github.la8garlic.signlens.focus.FocusState;
+import io.github.la8garlic.signlens.metrics.PerformanceCounters;
 import io.github.la8garlic.signlens.reading.SignReader;
 import io.github.la8garlic.signlens.reading.SignSnapshot;
 import io.github.la8garlic.signlens.render.ContentFormatter;
@@ -19,8 +20,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -39,6 +42,7 @@ public final class PlayerScanTask {
     private final ScanSettings settings;
     private final BooleanSupplier enabled;
     private final Clock clock;
+    private final PerformanceCounters counters;
     private final ViewChangeDetector viewChanges;
     private boolean stopped;
 
@@ -53,7 +57,19 @@ public final class PlayerScanTask {
             ScanSettings settings,
             BooleanSupplier enabled
     ) {
-        this(plugin, player, session, detector, reader, formatter, renderer, settings, enabled, Clock.systemUTC());
+        this(
+                plugin,
+                player,
+                session,
+                detector,
+                reader,
+                formatter,
+                renderer,
+                settings,
+                enabled,
+                new PerformanceCounters(),
+                Clock.systemUTC()
+        );
     }
 
     public PlayerScanTask(
@@ -68,6 +84,49 @@ public final class PlayerScanTask {
             BooleanSupplier enabled,
             Clock clock
     ) {
+        this(
+                plugin,
+                player,
+                session,
+                detector,
+                reader,
+                formatter,
+                renderer,
+                settings,
+                enabled,
+                new PerformanceCounters(),
+                clock
+        );
+    }
+
+    public PlayerScanTask(
+            Plugin plugin,
+            Player player,
+            PlayerSession session,
+            SignDetector detector,
+            SignReader reader,
+            ContentFormatter formatter,
+            SignRenderer renderer,
+            ScanSettings settings,
+            BooleanSupplier enabled,
+            PerformanceCounters counters
+    ) {
+        this(plugin, player, session, detector, reader, formatter, renderer, settings, enabled, counters, Clock.systemUTC());
+    }
+
+    public PlayerScanTask(
+            Plugin plugin,
+            Player player,
+            PlayerSession session,
+            SignDetector detector,
+            SignReader reader,
+            ContentFormatter formatter,
+            SignRenderer renderer,
+            ScanSettings settings,
+            BooleanSupplier enabled,
+            PerformanceCounters counters,
+            Clock clock
+    ) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.player = Objects.requireNonNull(player, "player");
         this.session = Objects.requireNonNull(session, "session");
@@ -77,6 +136,7 @@ public final class PlayerScanTask {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.enabled = Objects.requireNonNull(enabled, "enabled");
+        this.counters = Objects.requireNonNull(counters, "counters");
         this.clock = Objects.requireNonNull(clock, "clock");
         this.viewChanges = new ViewChangeDetector(
                 settings.positionThreshold(),
@@ -125,13 +185,22 @@ public final class PlayerScanTask {
             viewChanges.reset();
         }
         if (!viewChanges.shouldTrace(currentView, settings.scanPeriodTicks())) {
+            counters.recordScanSkip();
             return;
+        }
+        if (viewChanges.lastDecisionWasIdleProbe()) {
+            counters.recordIdleProbe();
         }
         viewChanges.recordTrace(currentView);
         session.lastView(currentView);
 
         Instant now = clock.instant();
+        long traceStarted = System.nanoTime();
         Optional<DetectedSign> detected = detector.detect(player);
+        long traceDuration = System.nanoTime() - traceStarted;
+        counters.recordRayTrace(detected.isPresent(), traceDuration);
+        session.recordRayTrace(now, traceDuration, detected.map(value -> distance(player, value))
+                .orElseGet(OptionalDouble::empty));
         FocusController focus = session.focusController();
         FocusTransition transition = focus.observe(
                 detected.map(PlayerScanTask::focusTarget),
@@ -146,6 +215,7 @@ public final class PlayerScanTask {
         }
 
         Optional<SignSnapshot> snapshot = reader.read(player, detected.orElseThrow());
+        counters.recordSnapshotRead();
         if (snapshot.isEmpty()) {
             session.clearLastSnapshot();
             apply(session.renderPolicy().observe(Optional.empty(), true, now));
@@ -154,6 +224,7 @@ public final class PlayerScanTask {
 
         SignSnapshot value = snapshot.orElseThrow();
         session.lastSnapshot(value);
+        counters.recordFormatterInvocation();
         Optional<FormattedContent> formatted = formatter.format(value);
         apply(session.renderPolicy().observe(formatted, true, now));
     }
@@ -168,5 +239,20 @@ public final class PlayerScanTask {
 
     private static FocusTarget focusTarget(DetectedSign detected) {
         return new FocusTarget(detected.worldId(), detected.x(), detected.y(), detected.z());
+    }
+
+    private static OptionalDouble distance(Player player, DetectedSign detected) {
+        Location origin = player.getLocation();
+        Location target = new Location(
+                player.getWorld(),
+                detected.x() + 0.5,
+                detected.y() + 0.5,
+                detected.z() + 0.5
+        );
+        try {
+            return OptionalDouble.of(origin.distance(target));
+        } catch (IllegalArgumentException ignored) {
+            return OptionalDouble.empty();
+        }
     }
 }

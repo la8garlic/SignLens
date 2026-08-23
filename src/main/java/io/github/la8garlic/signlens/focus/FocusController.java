@@ -23,6 +23,7 @@ public final class FocusController {
     private FocusTarget candidate;
     private Instant candidateSince;
     private FocusTarget focused;
+    private Instant focusedSince;
     private Instant lostSince;
     private Instant lastObservedAt;
 
@@ -55,6 +56,18 @@ public final class FocusController {
         return Optional.ofNullable(focused);
     }
 
+    public Optional<FocusTarget> currentTarget() {
+        return activeTarget();
+    }
+
+    public Optional<Instant> activeSince() {
+        return switch (state) {
+            case CANDIDATE -> Optional.ofNullable(candidateSince);
+            case FOCUSED, LOST_GRACE -> Optional.ofNullable(focusedSince);
+            case IDLE -> Optional.empty();
+        };
+    }
+
     /**
      * Applies one hit or miss observation at {@code now}.
      *
@@ -85,6 +98,7 @@ public final class FocusController {
                         candidateSince = now;
                     } else if (!now.isBefore(candidateSince.plus(dwell))) {
                         focused = target;
+                        focusedSince = now;
                         candidate = null;
                         candidateSince = null;
                         state = FocusState.FOCUSED;
@@ -95,6 +109,7 @@ public final class FocusController {
                     if (!target.equals(focused)) {
                         type = FocusTransitionType.FOCUS_ENDED;
                         focused = null;
+                        focusedSince = null;
                         candidate = target;
                         candidateSince = now;
                         state = FocusState.CANDIDATE;
@@ -107,6 +122,7 @@ public final class FocusController {
                     } else {
                         type = FocusTransitionType.FOCUS_ENDED;
                         focused = null;
+                        focusedSince = null;
                         candidate = target;
                         candidateSince = now;
                         lostSince = null;
@@ -132,6 +148,7 @@ public final class FocusController {
                     if (!now.isBefore(lostSince.plus(lostGrace))) {
                         type = FocusTransitionType.FOCUS_ENDED;
                         focused = null;
+                        focusedSince = null;
                         lostSince = null;
                         state = FocusState.IDLE;
                     }
@@ -156,6 +173,7 @@ public final class FocusController {
         candidate = null;
         candidateSince = null;
         focused = null;
+        focusedSince = null;
         lostSince = null;
         lastObservedAt = null;
 

@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
+import java.time.Instant;
 
 /**
  * Pure edge-triggered policy for formatted sign output.
@@ -40,6 +41,10 @@ public final class RenderPolicy {
 
     public Optional<FormattedContent> lastSentContent() {
         return Optional.ofNullable(lastSentContent);
+    }
+
+    public Optional<Instant> lastSentAt() {
+        return Optional.ofNullable(lastSentAt);
     }
 
     public RenderDecision observe(Optional<FormattedContent> content, boolean focusedNow, Instant now) {

@@ -24,6 +24,7 @@ class ViewChangeDetectorTest {
         assertFalse(detector.shouldTrace(view, 2));
         assertFalse(detector.shouldTrace(view, 2));
         assertTrue(detector.shouldTrace(view, 2));
+        assertTrue(detector.lastDecisionWasIdleProbe());
     }
 
     @Test

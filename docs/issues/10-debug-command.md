@@ -24,13 +24,19 @@ Child of Issue 01; reads session/counter state from Issues 07 and 08 without own
 
 ## Acceptance criteria
 
-- [ ] Authorized players can run `/signlens debug`.
-- [ ] Unauthorized players are denied without leaking session data.
-- [ ] Focused output includes the agreed diagnostic fields.
-- [ ] Miss/no-focus output explains the current high-level state.
-- [ ] Coordinates and world identifiers are readable but not exposed to other players.
-- [ ] Command output does not alter focus or rendering state.
+- [x] Authorized players can run `/signlens debug` when `debug.enabled` is true.
+- [x] Unauthorized players are denied without leaking session data.
+- [x] Focused output includes state, target side/coordinates, distance, dwell,
+      last/average ray-trace timing, render age, content counts, and counters.
+- [x] Miss/no-focus output explains the current high-level state and reports
+      `target: none` when no session is active.
+- [x] Coordinates and world identifiers are readable only in the sender's
+      on-demand response; the command never broadcasts session data.
+- [x] Command output does not alter focus, session, or rendering state.
 
 ## Verification
 
-Command tests cover permission, focused, candidate, idle, and no-session states. Manual Paper verification confirms the output is useful while investigating a distance or dwell failure.
+Command tests cover permission, focused, configuration-disabled, and no-session
+states. The local Paper preview can be used to inspect the output while
+investigating a distance or dwell failure; performance counters are also
+consumed by Issue 11 validation.

@@ -27,6 +27,7 @@ class FocusControllerTest {
         assertEquals(FocusState.CANDIDATE, beforeDwell.currentState());
         assertEquals(FocusTransitionType.NONE, beforeDwell.type());
         assertTrue(controller.candidate().isPresent());
+        assertEquals(at(0), controller.activeSince().orElseThrow());
     }
 
     @Test
@@ -60,6 +61,7 @@ class FocusControllerTest {
         assertTrue(ended.focusEnded());
         assertEquals(FocusState.IDLE, ended.currentState());
         assertEquals(FIRST, ended.previousTarget().orElseThrow());
+        assertTrue(controller.activeSince().isEmpty());
     }
 
     @Test
