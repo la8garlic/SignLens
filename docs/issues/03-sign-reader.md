@@ -25,12 +25,12 @@ Child of Issue 01; consumes the detected sign from Issue 02.
 
 ## Acceptance criteria
 
-- [ ] Front and back content are correctly distinguished.
-- [ ] Standing, wall, hanging, and wall-hanging signs are covered by integration tests.
-- [ ] The snapshot is immutable from the renderer's point of view.
-- [ ] Adventure `Component` lines are preserved; no `toString()` flattening.
-- [ ] Empty content is represented as non-renderable.
-- [ ] A broken/unavailable sign ends the read cleanly.
+- [x] Front and back content are correctly distinguished.
+- [x] Standing, wall, hanging, and wall-hanging signs are covered by integration tests.
+- [x] The snapshot is immutable from the renderer's point of view.
+- [x] Adventure `Component` lines are preserved; no `toString()` flattening.
+- [x] Empty content is represented as non-renderable.
+- [x] A broken/unavailable sign ends the read cleanly.
 
 ## Verification
 

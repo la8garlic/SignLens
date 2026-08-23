@@ -34,9 +34,9 @@ Create the initial Gradle project and plugin descriptor for Paper 26.2 / Java 25
 - [x] A clean Paper server loads the plugin without warnings caused by SignLens.
 - [x] The plugin descriptor declares the main class, version, permissions, and command contract.
 - [x] The four 0.1 ADRs and architecture boundaries are present.
-- [ ] The following child slices are linked when remote Issues are created:
-  - [ ] Detection abstraction
-  - [ ] Sign side/content reader
+- [x] Completed child slices are linked to their remote Issues:
+  - [x] Detection abstraction — [Issue #3](https://github.com/la8garlic/SignLens/issues/3)
+  - [x] Sign side/content reader — [Issue #6](https://github.com/la8garlic/SignLens/issues/6)
   - [ ] Focus state machine
   - [ ] Component formatter
   - [ ] ActionBar renderer
