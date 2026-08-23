@@ -11,6 +11,9 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.12.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.mockito:mockito-core:5.18.0")
+    testCompileOnly("io.papermc.paper:paper-api:${providers.gradleProperty("paperApiVersion").get()}")
+    testRuntimeOnly("io.papermc.paper:paper-api:${providers.gradleProperty("paperApiVersion").get()}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
