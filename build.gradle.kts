@@ -4,6 +4,7 @@ plugins {
 
 group = "io.github.la8garlic"
 val pluginVersion = providers.gradleProperty("pluginVersion").get()
+val pluginProperties = mapOf("pluginVersion" to pluginVersion)
 version = pluginVersion
 
 dependencies {
@@ -36,6 +37,11 @@ tasks {
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
         options.release = 25
+    }
+
+    processResources {
+        inputs.properties(pluginProperties)
+        expand(pluginProperties)
     }
 
     test {

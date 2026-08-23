@@ -1,20 +1,31 @@
 package io.github.la8garlic.signlens.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import org.bukkit.entity.Player;
 
 /** Owns one lifecycle-bound session per online player. */
 public final class SessionRegistry {
 
-    private final Map<UUID, PlayerSession> sessions = new HashMap<>();
+    private final Map<UUID, PlayerSession> sessions = new ConcurrentHashMap<>();
+    private final Function<UUID, PlayerSession> sessionFactory;
+
+    public SessionRegistry() {
+        this(PlayerSession::new);
+    }
+
+    public SessionRegistry(Function<UUID, PlayerSession> sessionFactory) {
+        this.sessionFactory = Objects.requireNonNull(sessionFactory, "sessionFactory");
+    }
 
     public PlayerSession getOrCreate(UUID playerId) {
         Objects.requireNonNull(playerId, "playerId");
-        return sessions.computeIfAbsent(playerId, PlayerSession::new);
+        return sessions.computeIfAbsent(playerId, key ->
+                Objects.requireNonNull(sessionFactory.apply(key), "sessionFactory result"));
     }
 
     public PlayerSession getOrCreate(Player player) {

@@ -1,5 +1,5 @@
 name: SignLens
-version: '0.1.0'
+version: '${pluginVersion}'
 main: io.github.la8garlic.signlens.SignLensPlugin
 description: A lightweight, zero-client world text accessibility layer for Paper.
 author: la8garlic
@@ -8,19 +8,13 @@ api-version: '26.2'
 
 commands:
   signlens:
-    description: Configure and inspect SignLens.
-    usage: /signlens [toggle|reload|debug]
+    description: Inspect the current SignLens session and performance state.
+    usage: /signlens debug
 
 permissions:
   signlens.use:
     description: Use SignLens reading assistance.
     default: true
-  signlens.command.toggle:
-    description: Toggle SignLens for yourself.
-    default: op
-  signlens.command.reload:
-    description: Reload SignLens configuration.
-    default: op
   signlens.command.debug:
     description: Inspect SignLens focus and performance state.
     default: op
