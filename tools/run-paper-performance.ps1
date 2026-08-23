@@ -12,13 +12,25 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$javaHome = $env:JAVA_HOME
-if ([string]::IsNullOrWhiteSpace($javaHome)) {
-    $javaHome = "C:\Program Files\Microsoft\jdk-25.0.4.7-hotspot"
+$java = $null
+if (-not [string]::IsNullOrWhiteSpace($env:JAVA_HOME)) {
+    $configuredJava = Join-Path $env:JAVA_HOME "bin\java.exe"
+    if (Test-Path -LiteralPath $configuredJava) {
+        $java = $configuredJava
+    }
 }
-$java = Join-Path $javaHome "bin\java.exe"
-if (-not (Test-Path -LiteralPath $java)) {
-    throw "Java 25 was not found at $java"
+if ($null -eq $java) {
+    $javaCommand = Get-Command java.exe -ErrorAction SilentlyContinue
+    if ($null -ne $javaCommand) {
+        $java = $javaCommand.Source
+    }
+}
+if ($null -eq $java) {
+    throw "Java 25 was not found. Set JAVA_HOME or add java.exe to PATH."
+}
+$javaVersion = (& $java -version 2>&1 | Out-String)
+if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'version "25\.') {
+    throw "SignLens requires Java 25, but '$java' reported: $javaVersion"
 }
 
 if ([string]::IsNullOrWhiteSpace($PaperJar)) {
@@ -50,7 +62,6 @@ if ($DurationSeconds -le 0) {
     throw "DurationSeconds must be greater than zero"
 }
 
-$env:JAVA_HOME = $javaHome
 & (Join-Path $repoRoot "gradlew.bat") build integrationProbe --console=plain --no-daemon
 if ($LASTEXITCODE -ne 0) {
     throw "Gradle build failed"
