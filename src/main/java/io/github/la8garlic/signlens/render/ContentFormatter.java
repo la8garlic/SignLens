@@ -10,7 +10,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import io.github.la8garlic.signlens.reading.SignContent;
 import io.github.la8garlic.signlens.reading.SignSnapshot;
 
-/** Converts immutable sign content into safe, line-aware ActionBar-ready content. */
+/** Converts immutable sign content into safe, line-aware renderer content. */
 public final class ContentFormatter {
 
     public static final int DEFAULT_SOFT_LIMIT = 96;
@@ -56,12 +56,12 @@ public final class ContentFormatter {
         return hardLimit;
     }
 
-    public Optional<Component> format(SignSnapshot snapshot) {
+    public Optional<FormattedContent> format(SignSnapshot snapshot) {
         Objects.requireNonNull(snapshot, "snapshot");
         return format(snapshot.content());
     }
 
-    public Optional<Component> format(SignContent content) {
+    public Optional<FormattedContent> format(SignContent content) {
         Objects.requireNonNull(content, "content");
 
         List<Component> lines = meaningfulLines(content);
@@ -69,17 +69,13 @@ public final class ContentFormatter {
             return Optional.empty();
         }
 
-        Component joined = Component.join(
-                net.kyori.adventure.text.JoinConfiguration.separator(Component.newline()),
-                lines
-        );
-        int visualLength = visualLength(joined);
+        int visualLength = lines.stream().mapToInt(ContentFormatter::visualLength).sum();
         if (visualLength <= softLimit) {
-            return Optional.of(joined);
+            return Optional.of(new FormattedContent(lines));
         }
 
         int targetLimit = visualLength > hardLimit ? hardLimit : softLimit;
-        return Optional.of(truncate(joined, targetLimit));
+        return Optional.of(new FormattedContent(truncate(lines, targetLimit)));
     }
 
     private List<Component> meaningfulLines(SignContent content) {
@@ -111,10 +107,25 @@ public final class ContentFormatter {
         return PLAIN_TEXT.serialize(line).isBlank();
     }
 
-    private Component truncate(Component component, int limit) {
-        Clip clip = clip(component, Math.max(0, limit - visualLength(Component.text(ELLIPSIS))));
-        Component result = clip.component();
-        return result.append(Component.text(ELLIPSIS));
+    private List<Component> truncate(List<Component> lines, int limit) {
+        int remaining = Math.max(0, limit - visualLength(Component.text(ELLIPSIS)));
+        List<Component> result = new ArrayList<>();
+
+        for (Component line : lines) {
+            Clip clip = clip(line, remaining);
+            result.add(clip.component());
+            remaining -= clip.used();
+            if (clip.used() < visualLength(line)) {
+                break;
+            }
+        }
+
+        if (result.isEmpty()) {
+            result.add(Component.empty());
+        }
+        int last = result.size() - 1;
+        result.set(last, result.get(last).append(Component.text(ELLIPSIS)));
+        return List.copyOf(result);
     }
 
     private Clip clip(Component component, int remaining) {

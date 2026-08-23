@@ -8,10 +8,10 @@ import org.bukkit.entity.Player;
 public final class ActionBarRenderer implements SignRenderer {
 
     @Override
-    public void show(Player player, Component content) {
+    public void show(Player player, FormattedContent content) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(content, "content");
-        player.sendActionBar(content);
+        player.sendActionBar(content.toActionBarComponent());
     }
 
     @Override

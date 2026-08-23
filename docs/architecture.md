@@ -32,6 +32,7 @@ signlens
 │   ├── ActionBarRenderer
 │   ├── ComponentSanitizer
 │   ├── ContentFormatter
+│   ├── FormattedContent
 │   └── RenderPolicy
 ├── session
 │   ├── PlayerSession
@@ -68,7 +69,7 @@ Forbidden dependencies:
 - `PlayerSession -> Bukkit scheduler`
 - domain formatting code -> live Bukkit `Sign` or `Block`
 
-The `SignSnapshot` boundary is important: after reading, rendering and formatting operate on immutable project-owned data.
+The `SignSnapshot` boundary is important: after reading, rendering and formatting operate on immutable project-owned data. `FormattedContent` keeps the individual lines available until the selected renderer projects them onto its output surface.
 
 ## Detection
 
@@ -141,7 +142,12 @@ interface SignRenderer {
 }
 ```
 
-`ActionBarRenderer` is the 0.1 implementation. It receives already-formatted content and knows nothing about ray tracing or focus timing.
+`ActionBarRenderer` is the 0.1 implementation. It receives line-aware
+`FormattedContent` and knows nothing about ray tracing or focus timing. Because
+the native ActionBar is a single-line surface, it renders line boundaries as a
+visible `↵` marker; it must never send a raw newline component. A future Dialog
+renderer can consume the same line list without changing detection, reading, or
+focus logic.
 
 Rendering is edge-triggered:
 

@@ -2,11 +2,9 @@
 
 ## Problem
 
-The current formatter treats each non-empty sign line as inline content and joins
-the lines with a punctuation-like separator. A sign written as `123` on the
-first line and `456` on the second line is therefore rendered as `123 · 456`
-(or an equivalent inline separator) instead of preserving the sign's line
-structure.
+The previous formatter passed a raw newline component to the ActionBar. The
+server packet preserved `123\n456`, but the native client ActionBar rendered
+that control character as a replacement glyph instead of a second row.
 
 ## Relationship
 
@@ -17,8 +15,8 @@ verification describe the actual viewer-facing output.
 ## Scope
 
 - Preserve the order and boundary of sign lines in the viewer-facing output.
-- Define a line-aware representation that is supported by the selected output
-  surface; do not silently replace line breaks with punctuation.
+- Keep a line-aware representation until the renderer boundary and define an
+  ActionBar-safe projection for the selected output surface.
 - Preserve Adventure components, formatting, color, and glowing metadata while
   keeping line boundaries intact.
 - Make filtering, visual-length calculation, and truncation line-aware.
@@ -33,23 +31,27 @@ verification describe the actual viewer-facing output.
 
 ## Acceptance criteria
 
-- [ ] A sign containing `123` on line one and `456` on line two is rendered
-      with an explicit line boundary, never as punctuation-joined inline text.
-- [ ] Line order and internal empty-line boundaries are preserved according to
-      the documented output representation.
-- [ ] A single-line sign keeps its current readable output.
-- [ ] Per-line Adventure formatting, color, and decorations survive the
+- [x] A sign containing `123` on line one and `456` on line two is rendered
+      with the explicit visible `↵` boundary, never as a replacement glyph or
+      punctuation-joined inline text.
+- [x] Line order and internal empty-line boundaries are preserved according to
+      the documented `FormattedContent`/ActionBar representation.
+- [x] A single-line sign keeps its current readable output.
+- [x] Per-line Adventure formatting, color, and decorations survive the
       line-aware formatting path.
-- [ ] Long multi-line content is truncated deterministically without merging
+- [x] Long multi-line content is truncated deterministically without merging
       two lines or dropping a line boundary unexpectedly.
-- [ ] Unit tests cover one-line, multi-line, empty-line, styled, and truncated
+- [x] Unit tests cover one-line, multi-line, empty-line, styled, and truncated
       content cases.
-- [ ] Manual Paper verification confirms the rendered result matches the sign
-      layout for the multi-line acceptance case.
+- [ ] Manual Paper verification confirms the local preview visibly renders
+      `123↵456` without the replacement glyph. Automated Paper verification
+      already confirms the runtime packet contains `123↵456` and no raw
+      newline.
 
 ## Verification
 
 Record the chosen line-aware representation in the UX/architecture
 documentation, run the formatter and integration test suites, and verify the
 result in the local Paper preview with a sign containing at least two distinct
-lines.
+lines. The 0.1 acceptance representation is `123↵456`; exact stacked rows are
+reserved for the future Dialog renderer.

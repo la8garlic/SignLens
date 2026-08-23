@@ -15,19 +15,22 @@ The result should feel like reading assistance, not a replacement HUD competing 
 
 ## Content presentation
 
-Sign lines are rendered in source order with explicit line boundaries. Leading
-and trailing empty lines are omitted, while empty lines between meaningful
-lines remain visible. The formatter must not replace a line break with
-punctuation or an inline separator.
+Sign lines are kept in source order with explicit line boundaries. Leading and
+trailing empty lines are omitted, while empty lines between meaningful lines
+remain visible. The formatter must not flatten a line break into punctuation or
+concatenate the source lines.
 
 ```text
-WELCOME
-
-TO
-SPAWN
+WELCOME↵↵TO↵SPAWN
 ```
 
-The formatter must retain the meaningful visual structure of the source components, including color and emphasis, and must preserve line boundaries between meaningful sign lines. It must not preserve interaction events in the rendered copy.
+`FormattedContent` retains the individual `Component` lines. In 0.1,
+`ActionBarRenderer` projects those lines onto the ActionBar with the visible
+`↵` marker because the native ActionBar does not lay out newline components as
+separate rows. This makes the boundary readable and avoids the replacement
+glyph shown by the previous implementation. A future Dialog renderer can use
+the same lines for exact multi-row layout. Formatting, color, and emphasis are
+retained; interaction events are removed from the rendered copy.
 
 ## Length policy
 
@@ -59,7 +62,7 @@ Expected behavior:
 
 ## Interaction compatibility
 
-0.1 is passive. It must not consume or cancel right-click/left-click sign interactions, open a Dialog, issue commands, or change the player's inventory or camera. A later deep-reading gesture belongs to 0.2 and must be separately configurable.
+0.1 is passive. It must not consume or cancel right-click/left-click sign interactions, open a Dialog, issue commands, or change the player's inventory or camera. A later opt-in Dialog/deep-reading gesture belongs to 0.2 and must be separately configurable.
 
 ## Accessibility and future direction
 

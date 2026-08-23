@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,8 @@ import org.junit.jupiter.api.Test;
 class RenderPolicyTest {
 
     private static final Instant START = Instant.parse("2026-01-01T00:00:00Z");
-    private static final Component FIRST = Component.text("first");
-    private static final Component SECOND = Component.text("second");
+    private static final FormattedContent FIRST = single("first");
+    private static final FormattedContent SECOND = single("second");
 
     @Test
     void focusEntrySendsOnceAndStableFocusDoesNotResendEachTick() {
@@ -82,8 +83,12 @@ class RenderPolicyTest {
                 () -> policy.observe(show(FIRST), true, at(99)));
     }
 
-    private static Optional<Component> show(Component component) {
-        return Optional.of(component);
+    private static Optional<FormattedContent> show(FormattedContent content) {
+        return Optional.of(content);
+    }
+
+    private static FormattedContent single(String content) {
+        return new FormattedContent(List.of(Component.text(content)));
     }
 
     private static Instant at(long milliseconds) {

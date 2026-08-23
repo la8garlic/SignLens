@@ -2,10 +2,9 @@ package io.github.la8garlic.signlens.render;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.kyori.adventure.text.Component;
 
 /** Immutable, side-effect-free render instruction. */
-public record RenderDecision(RenderDecisionType type, Optional<Component> content) {
+public record RenderDecision(RenderDecisionType type, Optional<FormattedContent> content) {
 
     public RenderDecision {
         Objects.requireNonNull(type, "type");
@@ -22,7 +21,7 @@ public record RenderDecision(RenderDecisionType type, Optional<Component> conten
         return new RenderDecision(RenderDecisionType.NONE, Optional.empty());
     }
 
-    public static RenderDecision show(Component content) {
+    public static RenderDecision show(FormattedContent content) {
         return new RenderDecision(RenderDecisionType.SHOW, Optional.of(content));
     }
 

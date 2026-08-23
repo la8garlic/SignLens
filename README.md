@@ -13,13 +13,15 @@ The first release is intentionally a passive reader:
 - Standing, wall, hanging, and wall-hanging signs.
 - Front/back side selection through the Paper API.
 - Adventure `Component` content with presentation formatting preserved.
+- Multi-line signs preserve their line structure internally and use a visible
+  `↵` line-break marker in the 0.1 ActionBar projection.
 - Focus detection with dwell and lost-grace states.
 - Edge-triggered ActionBar rendering; no per-tick ActionBar spam.
 - Adaptive per-player ray tracing with an idle probe.
 - Paper/Folia-compatible scheduling through player-owned `EntityScheduler` tasks.
 - No NMS, ProtocolLib, resource pack, database, generated entity, block mutation, or sign interaction interception.
 
-Dialog/deep-reading gestures are explicitly deferred to 0.2.
+Exact multi-row Dialog/deep-reading gestures are explicitly deferred to 0.2.
 
 ## Development
 
@@ -123,7 +125,7 @@ signlens.command.debug
 
 ## Project status
 
-This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 08: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, and adaptive scans. Viewer-facing line preservation, debug tooling, and performance release evidence remain in Issues 09–11. See:
+This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 09: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, adaptive scans, and ActionBar-safe line preservation. Debug tooling and performance release evidence remain in Issues 10–11. See:
 
 - [Architecture](docs/architecture.md)
 - [UX contract](docs/ux.md)

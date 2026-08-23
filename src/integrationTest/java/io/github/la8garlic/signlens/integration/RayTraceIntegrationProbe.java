@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.DyeColor;
@@ -57,6 +58,7 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
     }
 
     private void runProbe(Player player) {
+        player.setGameMode(GameMode.CREATIVE);
         Location origin = new Location(player.getWorld(), 0.5, 300.0, 0.5, 0.0f, 0.0f);
         Location signLocation = new Location(player.getWorld(), 0.0, 301.0, 3.0);
         player.teleport(origin);
@@ -172,10 +174,17 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
     private void finishRuntimePipeline(Player player, List<String> results, boolean previousCasesPassed) {
         SignLensPlugin plugin = JavaPlugin.getPlugin(SignLensPlugin.class);
         Optional<PlayerSession> session = plugin.sessions().find(player.getUniqueId());
+        boolean renderedLineBoundary = session.isPresent()
+                && session.orElseThrow().renderPolicy().lastSentContent().map(content ->
+                        content.lines().size() == 2
+                                && plain(content.lines().get(0)).equals("123")
+                                && plain(content.lines().get(1)).equals("456")
+                                && !plain(content.toActionBarComponent()).contains("\n")
+                ).orElse(false);
         boolean pipelinePassed = session.isPresent()
                 && session.orElseThrow().focusController().state() == FocusState.FOCUSED
                 && session.orElseThrow().lastSnapshot().isPresent()
-                && session.orElseThrow().renderPolicy().lastSentContent().isPresent();
+                && renderedLineBoundary;
         results.add("RUNTIME_PIPELINE=" + (pipelinePassed ? "PASS" : "FAIL"));
 
         boolean passed = previousCasesPassed && pipelinePassed;
@@ -249,5 +258,9 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
         } catch (IOException exception) {
             getLogger().severe("Could not write integration result: " + exception.getMessage());
         }
+    }
+
+    private static String plain(Component component) {
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 }

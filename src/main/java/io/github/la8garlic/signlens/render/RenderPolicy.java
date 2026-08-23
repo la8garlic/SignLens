@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
-import net.kyori.adventure.text.Component;
 
 /**
  * Pure edge-triggered policy for formatted sign output.
@@ -19,7 +18,7 @@ public final class RenderPolicy {
 
     private final Duration keepalive;
     private boolean focused;
-    private Component lastSentContent;
+    private FormattedContent lastSentContent;
     private Instant lastSentAt;
     private Instant lastObservedAt;
 
@@ -39,11 +38,11 @@ public final class RenderPolicy {
         return focused;
     }
 
-    public Optional<Component> lastSentContent() {
+    public Optional<FormattedContent> lastSentContent() {
         return Optional.ofNullable(lastSentContent);
     }
 
-    public RenderDecision observe(Optional<Component> content, boolean focusedNow, Instant now) {
+    public RenderDecision observe(Optional<FormattedContent> content, boolean focusedNow, Instant now) {
         Objects.requireNonNull(content, "content");
         Objects.requireNonNull(now, "now");
         ensureMonotonic(now);
@@ -60,7 +59,7 @@ public final class RenderPolicy {
             lastSentContent = null;
             lastSentAt = null;
         } else {
-            Component current = content.orElseThrow();
+            FormattedContent current = content.orElseThrow();
             boolean focusEntry = !focused;
             boolean contentChanged = !current.equals(lastSentContent);
             boolean keepaliveDue = lastSentAt == null
