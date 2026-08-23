@@ -159,6 +159,8 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
         sign.getSide(Side.FRONT).line(1, Component.text("ActionBar"));
         sign.update(true, false);
 
+        player.getWorld().getBlockAt(0, 299, 0).setType(Material.STONE);
+        player.getWorld().setSpawnLocation(0, 300, 0, 0.0f);
         player.teleport(new Location(player.getWorld(), 0.5, 300.0, 0.5, 0.0f, 0.0f));
         getServer().getScheduler().runTaskLater(this, () -> finishRuntimePipeline(
                 player,
