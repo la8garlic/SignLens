@@ -153,6 +153,10 @@ measured Paper performance validation. See:
 - [Issue series](docs/issues/)
 - [Changelog](CHANGELOG.md)
 
+## License
+
+SignLens is licensed under the [Apache License, Version 2.0](LICENSE).
+
 ## 0.1.0 release validation
 
 The final release candidate was validated on Paper 26.2 build 112 with Java
