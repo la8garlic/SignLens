@@ -88,6 +88,8 @@ class SignLensCommandTest {
         assertTrue(message.contains("lines=2, chars=6"));
         assertTrue(message.contains("p95-scan=1.000 ms"));
         assertTrue(message.contains("avg-ray=1.000 ms"));
+        assertTrue(message.contains("read-unavailable=0"));
+        assertTrue(message.contains("read-failures=0"));
     }
 
     @Test

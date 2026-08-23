@@ -11,7 +11,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.la8garlic.signlens.detection.DetectedSign;
+import io.github.la8garlic.signlens.metrics.PerformanceCounters;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -118,6 +122,68 @@ class PaperSignReaderTest {
         when(sign.getInteractableSideFor(player)).thenThrow(new IllegalStateException("state unavailable"));
 
         assertTrue(reader.read(player, detectedSign(worldId)).isEmpty());
+    }
+
+    @Test
+    void expectedUnavailableStateIsCountedWithoutReportingAnError() {
+        UUID worldId = UUID.randomUUID();
+        Player player = mockPlayer(worldId);
+        Sign sign = mockSign(player, Side.FRONT);
+        when(sign.getInteractableSideFor(player)).thenThrow(new IllegalArgumentException("state unavailable"));
+        PerformanceCounters counters = new PerformanceCounters();
+        List<RuntimeException> reports = new ArrayList<>();
+        PaperSignReader reader = new PaperSignReader(
+                counters,
+                (ignoredSign, failure) -> reports.add(failure),
+                Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), java.time.ZoneOffset.UTC)
+        );
+
+        assertTrue(reader.read(player, detectedSign(worldId)).isEmpty());
+
+        assertEquals(1L, counters.snapshot().signReadUnavailable());
+        assertEquals(0L, counters.snapshot().signReadFailures());
+        assertTrue(reports.isEmpty());
+    }
+
+    @Test
+    void unexpectedReaderFailureIsCountedAndReported() {
+        UUID worldId = UUID.randomUUID();
+        Player player = mockPlayer(worldId);
+        Sign sign = mockSign(player, Side.FRONT);
+        NullPointerException failure = new NullPointerException("broken side");
+        when(sign.getSide(Side.FRONT)).thenThrow(failure);
+        PerformanceCounters counters = new PerformanceCounters();
+        List<RuntimeException> reports = new ArrayList<>();
+        PaperSignReader reader = new PaperSignReader(
+                counters,
+                (ignoredSign, reportedFailure) -> reports.add(reportedFailure),
+                Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), java.time.ZoneOffset.UTC)
+        );
+
+        assertTrue(reader.read(player, detectedSign(worldId)).isEmpty());
+
+        assertEquals(0L, counters.snapshot().signReadUnavailable());
+        assertEquals(1L, counters.snapshot().signReadFailures());
+        assertEquals(List.of(failure), reports);
+    }
+
+    @Test
+    void unexpectedReaderReportsAreRateLimited() {
+        UUID worldId = UUID.randomUUID();
+        Player player = mockPlayer(worldId);
+        Sign sign = mockSign(player, Side.FRONT);
+        when(sign.getSide(Side.FRONT)).thenThrow(new NullPointerException("broken side"));
+        List<RuntimeException> reports = new ArrayList<>();
+        PaperSignReader reader = new PaperSignReader(
+                new PerformanceCounters(),
+                (ignoredSign, failure) -> reports.add(failure),
+                Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), java.time.ZoneOffset.UTC)
+        );
+
+        reader.read(player, detectedSign(worldId));
+        reader.read(player, detectedSign(worldId));
+
+        assertEquals(1, reports.size());
     }
 
     @Test

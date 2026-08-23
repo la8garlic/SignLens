@@ -27,6 +27,8 @@ public final class PerformanceCounters {
     private final LongAdder rayTraceMisses = new LongAdder();
     private final LongAdder rayTraceNanos = new LongAdder();
     private final LongAdder snapshotReads = new LongAdder();
+    private final LongAdder signReadUnavailable = new LongAdder();
+    private final LongAdder signReadFailures = new LongAdder();
     private final LongAdder formatterInvocations = new LongAdder();
     private final LongAdder actionBarSends = new LongAdder();
     private final LongAdder actionBarClears = new LongAdder();
@@ -62,6 +64,14 @@ public final class PerformanceCounters {
         snapshotReads.increment();
     }
 
+    public void recordSignReadUnavailable() {
+        signReadUnavailable.increment();
+    }
+
+    public void recordSignReadFailure() {
+        signReadFailures.increment();
+    }
+
     public void recordFormatterInvocation() {
         formatterInvocations.increment();
     }
@@ -88,6 +98,8 @@ public final class PerformanceCounters {
                 rayTraceMisses.sum(),
                 rayTraceNanos.sum(),
                 snapshotReads.sum(),
+                signReadUnavailable.sum(),
+                signReadFailures.sum(),
                 formatterInvocations.sum(),
                 actionBarSends.sum(),
                 actionBarClears.sum()
@@ -108,6 +120,8 @@ public final class PerformanceCounters {
         rayTraceMisses.reset();
         rayTraceNanos.reset();
         snapshotReads.reset();
+        signReadUnavailable.reset();
+        signReadFailures.reset();
         formatterInvocations.reset();
         actionBarSends.reset();
         actionBarClears.reset();
@@ -124,6 +138,8 @@ public final class PerformanceCounters {
             long rayTraceMisses,
             long rayTraceNanos,
             long snapshotReads,
+            long signReadUnavailable,
+            long signReadFailures,
             long formatterInvocations,
             long actionBarSends,
             long actionBarClears

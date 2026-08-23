@@ -97,6 +97,67 @@ class PlayerScanTaskTest {
         assertTrue(session.renderPolicy().lastSentContent().isPresent());
     }
 
+    @Test
+    void emptyReaderResultClearsPreviouslyRenderedContent() {
+        Plugin plugin = mock(Plugin.class);
+        Player player = mock(Player.class);
+        World world = mock(World.class);
+        SignDetector detector = mock(SignDetector.class);
+        SignReader reader = mock(SignReader.class);
+        SignRenderer renderer = mock(SignRenderer.class);
+        MutableClock clock = new MutableClock(START);
+        Location[] currentLocation = {new Location(world, 0, 0, 0, 0, 0)};
+
+        when(plugin.isEnabled()).thenReturn(true);
+        when(player.getUniqueId()).thenReturn(PLAYER_ID);
+        when(player.getWorld()).thenReturn(world);
+        when(world.getUID()).thenReturn(WORLD_ID);
+        when(player.isOnline()).thenReturn(true);
+        when(player.hasPermission(PlayerScanTask.USE_PERMISSION)).thenReturn(true);
+        when(player.getLocation()).thenAnswer(ignored -> currentLocation[0]);
+
+        DetectedSign detectedSign = new DetectedSign(WORLD_ID, 1, 2, 3, BlockFace.NORTH);
+        SignSnapshot snapshot = new SignSnapshot(
+                new SignKey(WORLD_ID, 1, 2, 3, Side.FRONT),
+                new SignContent(List.of(Component.text("Hello")), DyeColor.WHITE, false)
+        );
+        when(detector.detect(player)).thenReturn(Optional.of(detectedSign));
+        when(reader.read(player, detectedSign))
+                .thenReturn(Optional.of(snapshot))
+                .thenReturn(Optional.empty());
+
+        PlayerSession session = new PlayerSession(
+                PLAYER_ID,
+                new FocusController(Duration.ofMillis(100), Duration.ofMillis(100)),
+                new io.github.la8garlic.signlens.render.RenderPolicy(Duration.ofMillis(100))
+        );
+        PlayerScanTask task = new PlayerScanTask(
+                plugin,
+                player,
+                session,
+                detector,
+                reader,
+                new ContentFormatter(96, 120),
+                renderer,
+                new ScanSettings(8, 2, 10, 0.02, 1.0f),
+                () -> true,
+                clock
+        );
+
+        task.runScan();
+        clock.advance(Duration.ofMillis(100));
+        currentLocation[0] = new Location(world, 0.1, 0, 0, 0, 0);
+        task.runScan();
+        clock.advance(Duration.ofMillis(100));
+        currentLocation[0] = new Location(world, 0.2, 0, 0, 0, 0);
+        task.runScan();
+
+        verify(reader, times(2)).read(player, detectedSign);
+        verify(renderer).show(player, new FormattedContent(List.of(Component.text("Hello"))));
+        verify(renderer).clear(player);
+        assertTrue(session.lastSnapshot().isEmpty());
+    }
+
     private static final class MutableClock extends Clock {
 
         private Instant instant;
