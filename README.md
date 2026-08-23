@@ -2,6 +2,8 @@
 
 > A lightweight, zero-client world text accessibility layer for Paper.
 
+[![CI](https://github.com/la8garlic/SignLens/actions/workflows/ci.yml/badge.svg)](https://github.com/la8garlic/SignLens/actions/workflows/ci.yml)
+
 SignLens helps a player read Minecraft signs without changing the world, adding client mods, or taking ownership of sign interactions. It detects the sign under the player's view, waits until the player appears to be reading it, and presents the sign's content in an ActionBar.
 
 ## 0.1 scope
@@ -23,6 +25,16 @@ The first release is intentionally a passive reader:
 
 Exact multi-row Dialog/deep-reading gestures are explicitly deferred to 0.2.
 
+## Installation
+
+1. Run Paper 26.2 with Java 25.
+2. Download `SignLens-0.1.0.jar` from the GitHub release, or build it locally.
+3. Copy the JAR into the server's `plugins` directory and restart the server.
+
+No client mod, ProtocolLib installation, resource pack, or database is required.
+SignLens writes only its own `plugins/SignLens/config.yml` file and never edits
+signs or other world state.
+
 ## Development
 
 Requirements: Java 25 or newer and no separately installed Gradle is needed.
@@ -43,7 +55,8 @@ The plugin JAR is written to `build/libs/SignLens-0.1.0.jar`.
 
 To preview the runtime on a local Paper 26.2 server, run
 `./tools/run-paper-raytrace-integration.ps1 -KeepServer`; the temporary server
-stays available on `localhost:25565` after the automated probe completes.
+stays available on `localhost:25565` after the automated probe completes. The
+PowerShell harnesses discover Java 25 from `JAVA_HOME` or `PATH`.
 
 ## Runtime flow
 
@@ -105,33 +118,49 @@ debug:
   enabled: true
 ```
 
-These defaults are experiment starting points, not a promise that the values are final. They must be validated in-game and with profiling before 0.1 is released.
+These defaults are the measured 0.1 baseline. Detection thresholds and timing
+values are loaded at startup, validated, and applied to newly created player
+sessions. Restart the server after changing the file; 0.1 intentionally has no
+reload command. See [the performance evidence](docs/performance.md) for the
+local Paper validation environment and limitations.
 
 ## Commands and permissions
 
 ```text
-/signlens
-/signlens toggle
-/signlens reload
 /signlens debug
 ```
 
 ```text
 signlens.use                 (default: true)
-signlens.command.toggle
-signlens.command.reload
-signlens.command.debug
+signlens.command.debug       (default: op)
 ```
+
+The debug command reports only the sender's current focus/session and local
+performance counters. Per-player enable/disable preferences are deferred
+because 0.1 does not persist player settings.
 
 ## Project status
 
-This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 11: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, adaptive scans, ActionBar-safe line preservation, on-demand diagnostics, and measured performance validation. See:
+The 0.1.0 implementation is feature-complete through Issue 11: detection,
+focus, sign reading, formatting, ActionBar rendering, player sessions,
+adaptive scans, ActionBar-safe line preservation, on-demand diagnostics, and
+measured Paper performance validation. See:
 
 - [Architecture](docs/architecture.md)
 - [UX contract](docs/ux.md)
 - [Performance plan](docs/performance.md)
 - [Architecture decision records](docs/decisions/)
 - [Issue series](docs/issues/)
+- [Changelog](CHANGELOG.md)
+
+## Known limitations
+
+- The native ActionBar is one row. Sign line boundaries are shown with `↵`;
+  exact stacked rows are deferred to a future Dialog renderer.
+- Paper's block ray tracing may load chunks. SignLens uses one short view ray
+  and does not scan nearby blocks or maintain a global sign cache.
+- 0.1 targets Paper 26.2 and Java 25 only. Other Minecraft/Paper versions are
+  not part of this release contract.
 
 ## Non-negotiable invariants
 

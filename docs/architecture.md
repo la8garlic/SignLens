@@ -1,6 +1,6 @@
 # SignLens 0.1 architecture
 
-Status: proposed baseline for implementation.
+Status: implemented 0.1.0 baseline.
 
 ## Problem and boundary
 
@@ -16,13 +16,13 @@ signlens
 ├── detection
 │   ├── SignDetector
 │   ├── RayTraceSignDetector
-│   ├── ViewSample
 │   └── DetectedSign
 ├── focus
 │   ├── FocusController
 │   ├── FocusState
 │   └── FocusTransition
-├── sign
+├── reading
+│   ├── PaperSignReader
 │   ├── SignReader
 │   ├── SignSnapshot
 │   ├── SignKey
@@ -36,15 +36,16 @@ signlens
 │   └── RenderPolicy
 ├── session
 │   ├── PlayerSession
-│   └── SessionRegistry
-├── scheduler
-│   └── PlayerScanTask
+│   ├── SessionRegistry
+│   └── ViewSample
+├── scan
+│   ├── PlayerScanTask
+│   ├── ScanSettings
+│   └── ViewChangeDetector
 ├── command
 │   ├── SignLensCommand
 │   ├── DebugSnapshot
 │   └── DebugMessageFormatter
-├── config
-│   └── SignLensConfig
 └── metrics
     └── PerformanceCounters
 ```
@@ -95,7 +96,7 @@ LOST_GRACE -- same sign hit --> FOCUSED
 
 The controller receives a timestamped detection result and returns a transition. It owns no scheduler and sends no packets.
 
-Initial default values:
+0.1 default values:
 
 | Setting | Baseline |
 | --- | ---: |
@@ -115,12 +116,13 @@ The controller must treat a changed sign key as a new candidate. A miss during l
 ```java
 record SignKey(UUID worldId, int x, int y, int z, Side side) {}
 
-record SignSnapshot(
-    SignKey key,
+record SignContent(
     List<Component> lines,
     DyeColor color,
     boolean glowing
 ) {}
+
+record SignSnapshot(SignKey key, SignContent content) {}
 ```
 
 The exact API types should be confirmed against the Paper 26.2 API during bootstrap. Side selection must use the viewer-facing side API where available; SignLens must not duplicate face-orientation math from block rotation and player yaw.
@@ -139,7 +141,7 @@ Sign text is Adventure `Component` data. Formatting must not be flattened throug
 
 ```java
 interface SignRenderer {
-    void show(Player player, SignSnapshot snapshot);
+    void show(Player player, FormattedContent content);
     void clear(Player player);
 }
 ```
@@ -180,7 +182,12 @@ final class PlayerSession {
 
 The actual fields may evolve, but the session must not become a manager god class.
 
-On join, `SessionRegistry` creates a session and starts a player-owned task through `EntityScheduler`. On quit, teleport/world change, disable, or task retirement, the session is reset/disposed and no strong player reference is retained by the registry after removal.
+On join, `SignLensPlugin` obtains a session from the concurrent
+`SessionRegistry` and starts a player-owned task through `EntityScheduler`.
+On quit, teleport/world change, disable, or task retirement, the session is
+reset/disposed and no strong player reference is retained by the registry
+after removal. Runtime focus and rendering durations are injected when each
+session is created.
 
 Use Paper's scheduler model for shared Paper/Folia code:
 
@@ -202,12 +209,11 @@ Baseline thresholds:
 
 ```yaml
 detection:
-  movement:
-    yaw-threshold: 0.4
-    pitch-threshold: 0.4
-    position-threshold: 0.05
-  idle-probe:
-    period-ticks: 10
+  scan-period-ticks: 2
+  position-threshold: 0.02
+  rotation-threshold-degrees: 1.0
+performance:
+  idle-probe-ticks: 10
 ```
 
 ## World safety
@@ -232,9 +238,9 @@ and local counters. Permission is checked before session lookup, output is
 sent only to the command sender, and the command is on-demand so it cannot
 create a per-tick ActionBar stream. `debug.enabled` is the configuration gate.
 
-`PerformanceCounters` is local and resettable. It records skipped scans, idle
-probes, ray-trace hits/misses and duration, snapshot/formatter work, and
-ActionBar sends/clears for Issue 11 validation.
+`PerformanceCounters` is process-local. It records scan duration, skipped
+scans, idle probes, ray-trace hits/misses and duration, snapshot/formatter
+work, and ActionBar sends/clears for Issue 11 validation.
 
 ## Testing boundary
 

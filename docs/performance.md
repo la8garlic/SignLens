@@ -40,7 +40,8 @@ No code path may send an ActionBar on every tick merely because focus remains ac
 - session count;
 - last and rolling-average durations where measurement is cheap.
 
-Counters should be local to the process and resettable on reload; no remote telemetry or database is in 0.1.
+Counters should be local to the process and resettable by the validation
+harness; no remote telemetry or database is in 0.1.
 
 Issue 11 adds scan-cycle timing to the existing local counters. The runtime
 keeps a fixed 256-sample window for scan p95, so the measurement path has
@@ -198,7 +199,8 @@ Acceptance status:
 Known limitations and follow-up work:
 
 - The harness measures wall-clock tick intervals, not a profiler-attributed
-  SignLens MSPT slice. Run spark/JFR on the target deployment before release.
+  SignLens MSPT slice. Operators can add spark/JFR when validating a different
+  production host or workload.
 - The p95 scan value is a bounded recent sample, not a long-term percentile.
 - The scenarios use offline protocol clients and do not model vanilla client
   rendering, network latency, or a production world generator.
