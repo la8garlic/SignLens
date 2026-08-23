@@ -25,13 +25,13 @@ Child of Issue 01; hosts the runtime state that later adaptive scanning uses.
 
 ## Acceptance criteria
 
-- [ ] Join creates exactly one session for a player.
-- [ ] Quit removes the session and retires its task.
-- [ ] Teleport/world change resets candidate, focus, snapshot, and view state.
-- [ ] Disable retires all tasks and clears the registry.
-- [ ] The registry retains no player after removal.
-- [ ] Shared Paper/Folia code uses the player/entity scheduler boundary.
+- [x] Join creates exactly one session for a player.
+- [x] Quit removes the session and retires its task.
+- [x] Teleport/world change resets candidate, focus, snapshot, and view state.
+- [x] Disable retires all tasks and clears the registry.
+- [x] The registry retains no player after removal.
+- [x] Shared Paper/Folia code uses the player/entity scheduler boundary.
 
 ## Verification
 
-Lifecycle tests use fake sessions/tasks where possible; Paper integration verifies join, quit, teleport, world change, and disable behavior.
+Lifecycle unit tests use fake sessions/tasks for singleton creation, reset, retirement, and registry cleanup. Plugin event handlers bind join, quit, teleport, and world-change events to the registry; the real Paper lifecycle pass is included with the first runtime integration.
