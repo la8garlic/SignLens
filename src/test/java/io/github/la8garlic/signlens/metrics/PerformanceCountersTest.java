@@ -12,6 +12,8 @@ class PerformanceCountersTest {
 
         counters.recordScanSkip();
         counters.recordIdleProbe();
+        counters.recordScan(1_000_000L);
+        counters.recordScan(3_000_000L);
         counters.recordRayTrace(true, 1_000_000L);
         counters.recordRayTrace(false, 3_000_000L);
         counters.recordSnapshotRead();
@@ -22,6 +24,9 @@ class PerformanceCountersTest {
         PerformanceCounters.Snapshot snapshot = counters.snapshot();
         assertEquals(1L, snapshot.scanSkips());
         assertEquals(1L, snapshot.idleProbes());
+        assertEquals(2L, snapshot.scanCycles());
+        assertEquals(2_000_000.0, snapshot.averageScanNanos());
+        assertEquals(3_000_000L, snapshot.p95ScanNanos());
         assertEquals(2L, snapshot.rayTraces());
         assertEquals(1L, snapshot.rayTraceHits());
         assertEquals(1L, snapshot.rayTraceMisses());
@@ -36,13 +41,17 @@ class PerformanceCountersTest {
     void resetClearsAllCounters() {
         PerformanceCounters counters = new PerformanceCounters();
         counters.recordRayTrace(true, 1L);
+        counters.recordScan(1L);
         counters.recordActionBarSend();
 
         counters.reset();
 
         PerformanceCounters.Snapshot snapshot = counters.snapshot();
         assertEquals(0L, snapshot.rayTraces());
+        assertEquals(0L, snapshot.scanCycles());
         assertEquals(0L, snapshot.actionBarSends());
         assertEquals(0.0, snapshot.averageRayTraceNanos());
+        assertEquals(0.0, snapshot.averageScanNanos());
+        assertEquals(0L, snapshot.p95ScanNanos());
     }
 }

@@ -46,8 +46,15 @@ public final class DebugMessageFormatter {
                 + ", misses=" + counters.rayTraceMisses()
                 + ", skipped=" + counters.scanSkips()
                 + ", idle=" + counters.idleProbes()
+                + ", scans=" + counters.scanCycles()
+                + ", avg-scan=" + formatNanos(counters.averageScanNanos())
+                + ", p95-scan=" + formatNanos(counters.p95ScanNanos())
                 + ", avg-ray=" + String.format(Locale.ROOT, "%.3f ms", counters.averageRayTraceNanos() / 1_000_000.0)
                 + ", actionbar=" + counters.actionBarSends() + "/" + counters.actionBarClears();
+    }
+
+    private String formatNanos(double nanos) {
+        return String.format(Locale.ROOT, "%.3f ms", nanos / 1_000_000.0);
     }
 
     private static String formatDuration(java.util.Optional<java.time.Duration> duration) {

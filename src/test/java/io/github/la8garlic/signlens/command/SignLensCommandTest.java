@@ -68,6 +68,7 @@ class SignLensCommandTest {
                 true,
                 START.plusMillis(200)
         );
+        counters.recordScan(1_000_000L);
         counters.recordRayTrace(true, 1_000_000L);
 
         when(sender.getUniqueId()).thenReturn(playerId);
@@ -85,6 +86,7 @@ class SignLensCommandTest {
         assertTrue(message.contains("side=FRONT"));
         assertTrue(message.contains("distance=2.50 blocks"));
         assertTrue(message.contains("lines=2, chars=6"));
+        assertTrue(message.contains("p95-scan=1.000 ms"));
         assertTrue(message.contains("avg-ray=1.000 ms"));
     }
 

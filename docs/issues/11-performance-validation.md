@@ -25,16 +25,20 @@ Final acceptance child of Issue 01; validates the integrated runtime from Issues
 
 ## Acceptance criteria
 
-- [ ] Idle unchanged-view scans show a reduced ray-trace rate.
-- [ ] ActionBar sends are transition/TTL driven, not per tick.
-- [ ] No nearby-block scan is present in the runtime path.
-- [ ] Scenario A target is evaluated and reported.
-- [ ] Scenario B shows no material SignLens MSPT spike under documented conditions.
-- [ ] Scenario C approaches the idle-probe floor.
-- [ ] Scenario D is approximately independent of total sign count.
-- [ ] Ray-trace chunk-load behavior is documented.
-- [ ] Known limitations and follow-up work are recorded.
+- [x] Idle unchanged-view scans show a reduced ray-trace rate.
+- [x] ActionBar sends are transition/TTL driven, not per tick.
+- [x] No nearby-block scan is present in the runtime path.
+- [x] Scenario A target is evaluated and reported.
+- [x] Scenario B shows no material SignLens MSPT spike under documented conditions.
+- [x] Scenario C approaches the idle-probe floor.
+- [x] Scenario D is approximately independent of total sign count.
+- [x] Ray-trace chunk-load behavior is documented.
+- [x] Known limitations and follow-up work are recorded.
 
 ## Verification
 
-Attach reproducible measurements with exact Paper build, Java version, hardware, player/sign counts, configuration, profiler method, and send/ray-trace rates. This Issue is the 0.1 performance gate, not merely a documentation task.
+See [`docs/performance.md`](../performance.md) for reproducible commands,
+exact Paper/Java/hardware details, scenario results, scan/ray-trace rates,
+ActionBar counts, tick-interval controls, chunk-load limitations, and the
+release checklist. This Issue is the 0.1 performance gate, not merely a
+documentation task.
