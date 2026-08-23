@@ -4,7 +4,13 @@ plugins {
 
 group = "io.github.la8garlic"
 val pluginVersion = providers.gradleProperty("pluginVersion").get()
-val pluginProperties = mapOf("pluginVersion" to pluginVersion)
+val licenseName = providers.gradleProperty("licenseName").get()
+val licenseUrl = providers.gradleProperty("licenseUrl").get()
+val pluginProperties = mapOf(
+    "pluginVersion" to pluginVersion,
+    "licenseName" to licenseName,
+    "licenseUrl" to licenseUrl
+)
 version = pluginVersion
 
 dependencies {
@@ -42,6 +48,17 @@ tasks {
     processResources {
         inputs.properties(pluginProperties)
         expand(pluginProperties)
+    }
+
+    jar {
+        manifest {
+            attributes(
+                "Implementation-Title" to "SignLens",
+                "Implementation-Version" to pluginVersion,
+                "License" to licenseName,
+                "License-URL" to licenseUrl
+            )
+        }
     }
 
     test {
