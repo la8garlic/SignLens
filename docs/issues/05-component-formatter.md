@@ -26,14 +26,14 @@ Child of Issue 01; consumes `SignSnapshot` from Issue 03 and supplies content to
 
 ## Acceptance criteria
 
-- [ ] Four lines become one readable formatted component.
-- [ ] Pure empty lines are omitted.
-- [ ] Colors, bold, italic, underline, strikethrough, and font are preserved where supported.
-- [ ] Interaction metadata does not escape into the rendered copy.
-- [ ] Empty/whitespace-only input produces no renderable content.
-- [ ] Long content follows the configured soft/hard limits without unsafe unbounded output.
-- [ ] Formatter tests compare component structure, not only plain text.
+- [x] Four lines become one readable formatted component.
+- [x] Pure empty lines are omitted.
+- [x] Colors, bold, italic, underline, strikethrough, and font are preserved where supported.
+- [x] Interaction metadata does not escape into the rendered copy.
+- [x] Empty/whitespace-only input produces no renderable content.
+- [x] Long content follows the configured soft/hard limits without unsafe unbounded output.
+- [x] Formatter tests compare component structure, not only plain text.
 
 ## Verification
 
-Pure unit tests cover empty lines, color/emphasis, interaction metadata, normal length, soft-limit truncation, and hard-limit truncation.
+Pure unit tests cover empty lines, color/emphasis/font preservation, recursive interaction metadata removal, normal length, soft-limit truncation, hard-limit truncation, invalid configuration, and component-structure assertions.
