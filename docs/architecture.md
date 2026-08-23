@@ -128,7 +128,7 @@ The reader must support standing, wall, hanging, and wall-hanging signs, includi
 
 Sign text is Adventure `Component` data. Formatting must not be flattened through `Component#toString()` or by serializing everything to plain text.
 
-`ComponentSanitizer` should preserve presentation properties such as text, color, bold, italic, underlining, strikethrough, obfuscation policy, and font where supported. It should remove or deliberately neutralize interaction metadata such as click events, hover events, and insertion. SignLens is a reading layer, so its contract is:
+`ComponentSanitizer` should preserve presentation properties such as text, color, bold, italic, underlining, strikethrough, obfuscation policy, and font where supported. It should remove or deliberately neutralize interaction metadata such as click events, hover events, and insertion. The formatter must also preserve line boundaries between meaningful sign lines. SignLens is a reading layer, so its contract is:
 
 > Preserve presentation, not interaction.
 

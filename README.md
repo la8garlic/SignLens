@@ -92,7 +92,6 @@ focus:
 
 render:
   mode: action-bar
-  separator: " · "
   soft-limit: 96
   max-length: 120
   keepalive-millis: 2500
@@ -124,7 +123,7 @@ signlens.command.debug
 
 ## Project status
 
-This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 08: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, and adaptive scans. Debug tooling and performance release evidence remain in Issues 09–10. See:
+This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 08: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, and adaptive scans. Viewer-facing line preservation, debug tooling, and performance release evidence remain in Issues 09–11. See:
 
 - [Architecture](docs/architecture.md)
 - [UX contract](docs/ux.md)

@@ -77,7 +77,7 @@ class PlayerScanTaskTest {
                 session,
                 detector,
                 reader,
-                new ContentFormatter(" · ", 96, 120),
+                new ContentFormatter(96, 120),
                 renderer,
                 new ScanSettings(8, 2, 10, 0.02, 1.0f),
                 () -> true,

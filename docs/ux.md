@@ -15,13 +15,19 @@ The result should feel like reading assistance, not a replacement HUD competing 
 
 ## Content presentation
 
-Four sign lines are joined into one compact line. Empty lines are removed. The default separator is ` · ` with subdued styling.
+Sign lines are rendered in source order with explicit line boundaries. Leading
+and trailing empty lines are omitted, while empty lines between meaningful
+lines remain visible. The formatter must not replace a line break with
+punctuation or an inline separator.
 
 ```text
-WELCOME  ·  TO  ·  SPAWN
+WELCOME
+
+TO
+SPAWN
 ```
 
-The formatter must retain the meaningful visual structure of the source components, including color and emphasis. It must not preserve interaction events in the rendered copy.
+The formatter must retain the meaningful visual structure of the source components, including color and emphasis, and must preserve line boundaries between meaningful sign lines. It must not preserve interaction events in the rendered copy.
 
 ## Length policy
 

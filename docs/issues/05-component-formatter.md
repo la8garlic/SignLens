@@ -2,7 +2,7 @@
 
 ## Problem
 
-Sign lines are Adventure components, and four separate lines do not fit naturally in an ActionBar. Flattening components loses important presentation; copying interaction events can change behavior.
+Sign lines are Adventure components, and flattening four separate lines into punctuation-joined text loses important presentation. Copying interaction events can also change behavior.
 
 ## Relationship
 
@@ -12,8 +12,8 @@ Child of Issue 01; consumes `SignSnapshot` from Issue 03 and supplies content to
 
 - `ComponentSanitizer`.
 - `ContentFormatter`.
-- Remove pure empty lines.
-- Join non-empty lines with configurable low-presence separator ` · `.
+- Omit leading and trailing empty lines while preserving internal line boundaries.
+- Build a line-aware component without replacing line breaks with punctuation.
 - Preserve presentation formatting.
 - Remove or neutralize click, hover, and insertion metadata.
 - Soft/hard visual length limits with ellipsis truncation.
@@ -26,8 +26,8 @@ Child of Issue 01; consumes `SignSnapshot` from Issue 03 and supplies content to
 
 ## Acceptance criteria
 
-- [x] Four lines become one readable formatted component.
-- [x] Pure empty lines are omitted.
+- [x] Four lines become one readable line-aware component.
+- [x] Leading/trailing empty lines are omitted and internal empty-line boundaries are preserved.
 - [x] Colors, bold, italic, underline, strikethrough, and font are preserved where supported.
 - [x] Interaction metadata does not escape into the rendered copy.
 - [x] Empty/whitespace-only input produces no renderable content.

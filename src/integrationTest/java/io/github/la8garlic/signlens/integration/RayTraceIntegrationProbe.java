@@ -155,8 +155,8 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
         Block block = signLocation.getBlock();
         block.setType(Material.OAK_SIGN);
         Sign sign = (Sign) block.getState();
-        sign.getSide(Side.FRONT).line(0, Component.text("Runtime visible", NamedTextColor.GREEN));
-        sign.getSide(Side.FRONT).line(1, Component.text("ActionBar"));
+        sign.getSide(Side.FRONT).line(0, Component.text("123", NamedTextColor.GREEN));
+        sign.getSide(Side.FRONT).line(1, Component.text("456"));
         sign.update(true, false);
 
         player.getWorld().getBlockAt(0, 299, 0).setType(Material.STONE);

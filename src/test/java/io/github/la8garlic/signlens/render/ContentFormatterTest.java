@@ -25,17 +25,41 @@ class ContentFormatterTest {
             PlainTextComponentSerializer.plainText();
 
     @Test
-    void joinsFourLinesAndOmitsPureWhitespaceLines() {
-        ContentFormatter formatter = new ContentFormatter(" · ", 100, 120);
+    void preservesLineBoundariesAndOmitsLeadingAndTrailingWhitespaceLines() {
+        ContentFormatter formatter = new ContentFormatter(100, 120);
 
         Optional<Component> formatted = formatter.format(content(
                 Component.text("WELCOME"),
                 Component.text(" "),
                 Component.text("TO"),
-                Component.text("SPAWN")
+                Component.text("SPAWN"),
+                Component.empty()
         ));
 
-        assertEquals("WELCOME · TO · SPAWN", plain(formatted));
+        assertEquals("WELCOME\n\nTO\nSPAWN", plain(formatted));
+    }
+
+    @Test
+    void preservesTheAcceptanceExampleAsTwoLines() {
+        Component result = new ContentFormatter(100, 120).format(content(
+                Component.text("123"),
+                Component.text("456")
+        )).orElseThrow();
+
+        assertEquals("123\n456", plain(result));
+        assertFalse(plain(result).contains("·"));
+    }
+
+    @Test
+    void preservesFormattingOnEachLine() {
+        Component result = new ContentFormatter(100, 120).format(content(
+                Component.text("123", NamedTextColor.RED),
+                Component.text("456", NamedTextColor.BLUE)
+        )).orElseThrow();
+
+        assertEquals("123\n456", plain(result));
+        assertEquals(NamedTextColor.RED, findText(result, "123").color());
+        assertEquals(NamedTextColor.BLUE, findText(result, "456").color());
     }
 
     @Test
@@ -51,7 +75,7 @@ class ContentFormatterTest {
                 .clickEvent(ClickEvent.runCommand("/secret"))
                 .insertion("secret");
 
-        Optional<Component> formatted = new ContentFormatter(" · ", 100, 120)
+        Optional<Component> formatted = new ContentFormatter(100, 120)
                 .format(content(source));
 
         Component result = formatted.orElseThrow();
@@ -82,7 +106,7 @@ class ContentFormatterTest {
 
     @Test
     void contentBeyondSoftLimitGetsAStyledStructureAndEllipsis() {
-        ContentFormatter formatter = new ContentFormatter(" · ", 8, 20);
+        ContentFormatter formatter = new ContentFormatter(8, 20);
 
         Component result = formatter.format(content(
                 Component.text("123456789").color(NamedTextColor.GREEN)
@@ -95,7 +119,7 @@ class ContentFormatterTest {
 
     @Test
     void contentBeyondHardLimitNeverEscapesTheSafetyCap() {
-        ContentFormatter formatter = new ContentFormatter(" · ", 8, 12);
+        ContentFormatter formatter = new ContentFormatter(8, 12);
 
         Component result = formatter.format(content(
                 Component.text("012345678901234567890123456789")
@@ -106,22 +130,33 @@ class ContentFormatterTest {
     }
 
     @Test
+    void truncatesMultilineContentWithoutFlatteningTheLineBoundary() {
+        Component result = new ContentFormatter(5, 10).format(content(
+                Component.text("123"),
+                Component.text("456")
+        )).orElseThrow();
+
+        assertEquals("123\n4…", plain(result));
+        assertEquals(5, visualLength(result));
+    }
+
+    @Test
     void normalLengthContentIsNotTruncated() {
-        ContentFormatter formatter = new ContentFormatter(" / ", 20, 30);
+        ContentFormatter formatter = new ContentFormatter(20, 30);
 
         Component result = formatter.format(content(
                 Component.text("LEFT"),
                 Component.text("RIGHT")
         )).orElseThrow();
 
-        assertEquals("LEFT / RIGHT", plain(result));
+        assertEquals("LEFT\nRIGHT", plain(result));
         assertFalse(plain(result).contains("…"));
     }
 
     @Test
     void rejectsInvalidLengthConfiguration() {
-        assertThrows(IllegalArgumentException.class, () -> new ContentFormatter(" · ", 0, 10));
-        assertThrows(IllegalArgumentException.class, () -> new ContentFormatter(" · ", 10, 9));
+        assertThrows(IllegalArgumentException.class, () -> new ContentFormatter(0, 10));
+        assertThrows(IllegalArgumentException.class, () -> new ContentFormatter(10, 9));
     }
 
     private static SignContent content(Component... lines) {
@@ -138,7 +173,9 @@ class ContentFormatterTest {
 
     private static int visualLength(Component component) {
         String plain = PLAIN_TEXT.serialize(component);
-        return plain.codePointCount(0, plain.length());
+        return (int) plain.codePoints()
+                .filter(codePoint -> codePoint != '\n' && codePoint != '\r')
+                .count();
     }
 
     private static TextComponent findText(Component component, String content) {
