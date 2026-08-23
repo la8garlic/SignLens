@@ -38,7 +38,7 @@ Create the initial Gradle project and plugin descriptor for Paper 26.2 / Java 25
   - [x] Detection abstraction — [Issue #3](https://github.com/la8garlic/SignLens/issues/3)
   - [x] Sign side/content reader — [Issue #6](https://github.com/la8garlic/SignLens/issues/6)
   - [x] Focus state machine — [Issue #9](https://github.com/la8garlic/SignLens/issues/9)
-  - [ ] Component formatter
+  - [x] Component formatter — [Issue #11](https://github.com/la8garlic/SignLens/issues/11)
   - [ ] ActionBar renderer
   - [ ] Session lifecycle
   - [ ] Adaptive scan
