@@ -37,7 +37,7 @@ Create the initial Gradle project and plugin descriptor for Paper 26.2 / Java 25
 - [x] Completed child slices are linked to their remote Issues:
   - [x] Detection abstraction — [Issue #3](https://github.com/la8garlic/SignLens/issues/3)
   - [x] Sign side/content reader — [Issue #6](https://github.com/la8garlic/SignLens/issues/6)
-  - [ ] Focus state machine
+  - [x] Focus state machine — [Issue #9](https://github.com/la8garlic/SignLens/issues/9)
   - [ ] Component formatter
   - [ ] ActionBar renderer
   - [ ] Session lifecycle

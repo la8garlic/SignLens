@@ -24,13 +24,13 @@ Child of Issue 01; consumes detection results from Issue 02 and emits transition
 
 ## Acceptance criteria
 
-- [ ] A short hit remains `CANDIDATE` and does not focus.
-- [ ] Stable observation beyond dwell emits a focus transition once.
-- [ ] A miss inside lost grace does not immediately clear focus.
-- [ ] A continued miss beyond lost grace emits a clear/end transition.
-- [ ] Switching signs cannot reuse the old candidate dwell.
-- [ ] Repeated identical inputs do not emit duplicate transitions.
+- [x] A short hit remains `CANDIDATE` and does not focus.
+- [x] Stable observation beyond dwell emits a focus transition once.
+- [x] A miss inside lost grace does not immediately clear focus.
+- [x] A continued miss beyond lost grace emits a clear/end transition.
+- [x] Switching signs cannot reuse the old candidate dwell.
+- [x] Repeated identical inputs do not emit duplicate transitions.
 
 ## Verification
 
-Pure unit tests cover 100 ms candidate, 250 ms focus, 100 ms grace miss, and 400 ms full loss scenarios with deterministic timestamps.
+Pure unit tests cover deterministic candidate, dwell, grace-recovery, full-loss, target-switch, reset, duplicate-transition, and timestamp-validation scenarios. The durations are configurable and the default baseline is 200 ms dwell with 300 ms lost grace.
