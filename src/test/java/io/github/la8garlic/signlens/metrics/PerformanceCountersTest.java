@@ -17,6 +17,8 @@ class PerformanceCountersTest {
         counters.recordRayTrace(true, 1_000_000L);
         counters.recordRayTrace(false, 3_000_000L);
         counters.recordSnapshotRead();
+        counters.recordSignReadUnavailable();
+        counters.recordSignReadFailure();
         counters.recordFormatterInvocation();
         counters.recordActionBarSend();
         counters.recordActionBarClear();
@@ -32,6 +34,8 @@ class PerformanceCountersTest {
         assertEquals(1L, snapshot.rayTraceMisses());
         assertEquals(2_000_000.0, snapshot.averageRayTraceNanos());
         assertEquals(1L, snapshot.snapshotReads());
+        assertEquals(1L, snapshot.signReadUnavailable());
+        assertEquals(1L, snapshot.signReadFailures());
         assertEquals(1L, snapshot.formatterInvocations());
         assertEquals(1L, snapshot.actionBarSends());
         assertEquals(1L, snapshot.actionBarClears());
@@ -42,6 +46,8 @@ class PerformanceCountersTest {
         PerformanceCounters counters = new PerformanceCounters();
         counters.recordRayTrace(true, 1L);
         counters.recordScan(1L);
+        counters.recordSignReadUnavailable();
+        counters.recordSignReadFailure();
         counters.recordActionBarSend();
 
         counters.reset();
@@ -49,6 +55,8 @@ class PerformanceCountersTest {
         PerformanceCounters.Snapshot snapshot = counters.snapshot();
         assertEquals(0L, snapshot.rayTraces());
         assertEquals(0L, snapshot.scanCycles());
+        assertEquals(0L, snapshot.signReadUnavailable());
+        assertEquals(0L, snapshot.signReadFailures());
         assertEquals(0L, snapshot.actionBarSends());
         assertEquals(0.0, snapshot.averageRayTraceNanos());
         assertEquals(0.0, snapshot.averageScanNanos());

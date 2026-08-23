@@ -18,6 +18,7 @@ import io.github.la8garlic.signlens.session.SessionRegistry;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Level;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -75,7 +76,16 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
         focusLostGrace = configuredDuration("focus.lost-grace-millis", 300L);
         renderKeepalive = configuredDuration("render.keepalive-millis", 2500L);
         detector = new RayTraceSignDetector(scanSettings.maxDistance());
-        reader = new PaperSignReader();
+        reader = new PaperSignReader(
+                performanceCounters,
+                (detectedSign, failure) -> getLogger().log(
+                        Level.WARNING,
+                        "Unexpected sign read failure at "
+                                + detectedSign.x() + "," + detectedSign.y() + "," + detectedSign.z()
+                                + "; scan continues.",
+                        failure
+                )
+        );
         formatter = new ContentFormatter(
                 getConfig().getInt("render.soft-limit", ContentFormatter.DEFAULT_SOFT_LIMIT),
                 getConfig().getInt("render.max-length", ContentFormatter.DEFAULT_HARD_LIMIT)

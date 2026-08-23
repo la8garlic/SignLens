@@ -240,7 +240,13 @@ create a per-tick ActionBar stream. `debug.enabled` is the configuration gate.
 
 `PerformanceCounters` is process-local. It records scan duration, skipped
 scans, idle probes, ray-trace hits/misses and duration, snapshot/formatter
-work, and ActionBar sends/clears for Issue 11 validation.
+work, ActionBar sends/clears for Issue 11 validation, and sign-reader
+availability/failure outcomes. `PaperSignReader` treats
+`IllegalStateException` and `IllegalArgumentException` as expected transient
+unavailability. Other runtime failures remain safe for the scan pipeline but
+are counted and reported through the plugin logger at most once per 30 seconds
+so an API or integration defect is visible without turning a broken sign into
+a log flood. `/signlens debug` exposes both reader counters.
 
 ## Testing boundary
 

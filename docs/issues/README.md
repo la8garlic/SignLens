@@ -15,7 +15,8 @@ These are local GitHub Issue drafts. They are not remote Issues and contain no g
  ├─ 08 Adaptive scan
  ├─ 09 Preserve sign line breaks in rendered output
  ├─ 10 Debug command
- └─ 11 Performance validation
+ ├─ 11 Performance validation
+ └─ 12 Reader failure diagnostics (0.1.x reliability)
 ```
 
 The order is a recommended delivery sequence, not a claim that every later Issue is hard-blocked by every earlier one. Native blocking metadata should be added only after the repository is connected to GitHub and the exact dependency is confirmed.

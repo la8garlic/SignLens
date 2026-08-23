@@ -50,6 +50,8 @@ public final class DebugMessageFormatter {
                 + ", avg-scan=" + formatNanos(counters.averageScanNanos())
                 + ", p95-scan=" + formatNanos(counters.p95ScanNanos())
                 + ", avg-ray=" + String.format(Locale.ROOT, "%.3f ms", counters.averageRayTraceNanos() / 1_000_000.0)
+                + ", read-unavailable=" + counters.signReadUnavailable()
+                + ", read-failures=" + counters.signReadFailures()
                 + ", actionbar=" + counters.actionBarSends() + "/" + counters.actionBarClears();
     }
 
