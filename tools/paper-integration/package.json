@@ -1,0 +1,8 @@
+{
+  "name": "signlens-paper-integration",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "minecraft-protocol": "https://github.com/Complexity-ML/node-minecraft-protocol-26.2/releases/download/complexity-26.2.3/minecraft-protocol-complexity-26.2.3.tgz"
+  }
+}
