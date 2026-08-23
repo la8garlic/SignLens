@@ -24,14 +24,14 @@ Child of Issue 01; consumes formatted content from Issue 05 and focus transition
 
 ## Acceptance criteria
 
-- [ ] Focus entry sends once.
-- [ ] Stable focus does not send once per tick.
-- [ ] Content change sends the new content once.
-- [ ] Keepalive is bounded by the configured TTL and only applies while focused.
-- [ ] Focus end clears once.
-- [ ] Empty snapshots do not send visible content.
-- [ ] Renderer depends on `SignSnapshot`/formatted content, not Bukkit ray tracing.
+- [x] Focus entry sends once.
+- [x] Stable focus does not send once per tick.
+- [x] Content change sends the new content once.
+- [x] Keepalive is bounded by the configured TTL and only applies while focused.
+- [x] Focus end clears once.
+- [x] Empty snapshots do not send visible content.
+- [x] Renderer depends on `SignSnapshot`/formatted content, not Bukkit ray tracing.
 
 ## Verification
 
-Unit-test `RenderPolicy` with fake clock/timestamps and an in-memory renderer spy. Include an assertion on send count for a multi-second stable focus.
+Unit-test `RenderPolicy` with deterministic timestamps and verify `ActionBarRenderer` sends formatted Adventure components. Stable focus is checked across a multi-second interval with no per-tick resend.
