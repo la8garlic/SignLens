@@ -4,6 +4,7 @@ import io.github.la8garlic.signlens.SignLensPlugin;
 import io.github.la8garlic.signlens.detection.DetectedSign;
 import io.github.la8garlic.signlens.detection.RayTraceSignDetector;
 import io.github.la8garlic.signlens.focus.FocusState;
+import io.github.la8garlic.signlens.metrics.PerformanceCounters;
 import io.github.la8garlic.signlens.reading.PaperSignReader;
 import io.github.la8garlic.signlens.session.PlayerSession;
 import io.github.la8garlic.signlens.reading.SignSnapshot;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -28,6 +30,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -46,6 +50,8 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
             Material.OAK_WALL_HANGING_SIGN
     );
 
+    private boolean performanceProbeStarted;
+
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
@@ -54,7 +60,122 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        if (performanceMode()) {
+            startPerformanceProbe();
+            return;
+        }
         getServer().getScheduler().runTaskLater(this, () -> runProbe(player), 20L);
+    }
+
+    private boolean performanceMode() {
+        return "performance".equalsIgnoreCase(System.getProperty("signlens.integration.mode", ""));
+    }
+
+    private void startPerformanceProbe() {
+        if (performanceProbeStarted) {
+            return;
+        }
+        performanceProbeStarted = true;
+        getServer().getScheduler().runTaskLater(this, this::beginPerformanceMeasurement, 100L);
+    }
+
+    private void beginPerformanceMeasurement() {
+        SignLensPlugin plugin = JavaPlugin.getPlugin(SignLensPlugin.class);
+        String scenario = System.getProperty("signlens.performance.scenario", "unknown");
+        int durationSeconds = Math.max(1, Integer.getInteger("signlens.performance.duration-seconds", 20));
+        int durationTicks = durationSeconds * 20;
+        int signs = preparePerformanceWorld(scenario);
+        PerformanceCounters counters = plugin.performanceCounters();
+        counters.reset();
+
+        List<Long> tickIntervals = new ArrayList<>();
+        long[] previousTick = {System.nanoTime()};
+        int[] samples = {0};
+        BukkitTask[] task = new BukkitTask[1];
+        task[0] = new BukkitRunnable() {
+            @Override
+            public void run() {
+                long now = System.nanoTime();
+                tickIntervals.add(now - previousTick[0]);
+                previousTick[0] = now;
+                samples[0]++;
+                if (samples[0] >= durationTicks) {
+                    task[0].cancel();
+                    writePerformanceResult(scenario, durationSeconds, signs, counters.snapshot(), tickIntervals);
+                }
+            }
+        }.runTaskTimer(this, 1L, 1L);
+    }
+
+    private int preparePerformanceWorld(String scenario) {
+        if (!"sign-density".equalsIgnoreCase(scenario)) {
+            return 0;
+        }
+
+        Player firstPlayer = getServer().getOnlinePlayers().stream().findFirst().orElse(null);
+        if (firstPlayer == null) {
+            return 0;
+        }
+
+        Location origin = new Location(firstPlayer.getWorld(), 0.0, 300.0, 0.0);
+        int placed = 0;
+        for (int x = -20; x <= 20 && placed < 1000; x++) {
+            for (int z = -20; z <= 20 && placed < 1000; z++) {
+                origin.getWorld().getBlockAt(x, 301, z).setType(Material.OAK_SIGN);
+                placed++;
+            }
+        }
+        return placed;
+    }
+
+    private void writePerformanceResult(
+            String scenario,
+            int durationSeconds,
+            int signs,
+            PerformanceCounters.Snapshot counters,
+            List<Long> tickIntervals
+    ) {
+        long intervalTotal = tickIntervals.stream().mapToLong(Long::longValue).sum();
+        double averageTickMillis = tickIntervals.isEmpty()
+                ? 0.0
+                : intervalTotal / (double) tickIntervals.size() / 1_000_000.0;
+        long p95TickNanos = percentile(tickIntervals, 0.95);
+        String result = String.format(
+                Locale.ROOT,
+                "PERFORMANCE PASS scenario=%s players=%d signs=%d duration-s=%d "
+                        + "scans=%d traces=%d hits=%d misses=%d skipped=%d idle=%d "
+                        + "avg-scan-ms=%.3f p95-scan-ms=%.3f avg-ray-ms=%.3f "
+                        + "actionbar-sends=%d actionbar-clears=%d avg-tick-ms=%.3f p95-tick-ms=%.3f",
+                scenario,
+                getServer().getOnlinePlayers().size(),
+                signs,
+                durationSeconds,
+                counters.scanCycles(),
+                counters.rayTraces(),
+                counters.rayTraceHits(),
+                counters.rayTraceMisses(),
+                counters.scanSkips(),
+                counters.idleProbes(),
+                counters.averageScanNanos() / 1_000_000.0,
+                counters.p95ScanNanos() / 1_000_000.0,
+                counters.averageRayTraceNanos() / 1_000_000.0,
+                counters.actionBarSends(),
+                counters.actionBarClears(),
+                averageTickMillis,
+                p95TickNanos / 1_000_000.0
+        );
+        getLogger().info(result);
+        writeResult(result);
+    }
+
+    private static long percentile(List<Long> values, double percentile) {
+        if (values.isEmpty()) {
+            return 0L;
+        }
+        List<Long> sorted = new ArrayList<>(values);
+        sorted.sort(Long::compareTo);
+        int index = Math.max(0, (int) Math.ceil(sorted.size() * percentile) - 1);
+        return sorted.get(index);
     }
 
     private void runProbe(Player player) {

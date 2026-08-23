@@ -125,7 +125,7 @@ signlens.command.debug
 
 ## Project status
 
-This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 10: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, adaptive scans, ActionBar-safe line preservation, and on-demand diagnostics. Performance release evidence remains in Issue 11. See:
+This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 11: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, adaptive scans, ActionBar-safe line preservation, on-demand diagnostics, and measured performance validation. See:
 
 - [Architecture](docs/architecture.md)
 - [UX contract](docs/ux.md)

@@ -175,58 +175,63 @@ public final class PlayerScanTask {
         if (stopped || !plugin.isEnabled()) {
             return;
         }
-        if (!enabled.getAsBoolean() || !player.isOnline() || !player.hasPermission(USE_PERMISSION)) {
-            apply(session.reset());
-            return;
-        }
+        long scanStarted = System.nanoTime();
+        try {
+            if (!enabled.getAsBoolean() || !player.isOnline() || !player.hasPermission(USE_PERMISSION)) {
+                apply(session.reset());
+                return;
+            }
 
-        ViewSample currentView = ViewSample.from(player);
-        if (session.lastView().isEmpty()) {
-            viewChanges.reset();
-        }
-        if (!viewChanges.shouldTrace(currentView, settings.scanPeriodTicks())) {
-            counters.recordScanSkip();
-            return;
-        }
-        if (viewChanges.lastDecisionWasIdleProbe()) {
-            counters.recordIdleProbe();
-        }
-        viewChanges.recordTrace(currentView);
-        session.lastView(currentView);
+            ViewSample currentView = ViewSample.from(player);
+            if (session.lastView().isEmpty()) {
+                viewChanges.reset();
+            }
+            if (!viewChanges.shouldTrace(currentView, settings.scanPeriodTicks())) {
+                counters.recordScanSkip();
+                return;
+            }
+            if (viewChanges.lastDecisionWasIdleProbe()) {
+                counters.recordIdleProbe();
+            }
+            viewChanges.recordTrace(currentView);
+            session.lastView(currentView);
 
-        Instant now = clock.instant();
-        long traceStarted = System.nanoTime();
-        Optional<DetectedSign> detected = detector.detect(player);
-        long traceDuration = System.nanoTime() - traceStarted;
-        counters.recordRayTrace(detected.isPresent(), traceDuration);
-        session.recordRayTrace(now, traceDuration, detected.map(value -> distance(player, value))
-                .orElseGet(OptionalDouble::empty));
-        FocusController focus = session.focusController();
-        FocusTransition transition = focus.observe(
-                detected.map(PlayerScanTask::focusTarget),
-                now
-        );
+            Instant now = clock.instant();
+            long traceStarted = System.nanoTime();
+            Optional<DetectedSign> detected = detector.detect(player);
+            long traceDuration = System.nanoTime() - traceStarted;
+            counters.recordRayTrace(detected.isPresent(), traceDuration);
+            session.recordRayTrace(now, traceDuration, detected.map(value -> distance(player, value))
+                    .orElseGet(OptionalDouble::empty));
+            FocusController focus = session.focusController();
+            FocusTransition transition = focus.observe(
+                    detected.map(PlayerScanTask::focusTarget),
+                    now
+            );
 
-        if (transition.focusEnded()) {
-            apply(session.renderPolicy().observe(Optional.empty(), false, now));
-        }
-        if (transition.currentState() != FocusState.FOCUSED || detected.isEmpty()) {
-            return;
-        }
+            if (transition.focusEnded()) {
+                apply(session.renderPolicy().observe(Optional.empty(), false, now));
+            }
+            if (transition.currentState() != FocusState.FOCUSED || detected.isEmpty()) {
+                return;
+            }
 
-        Optional<SignSnapshot> snapshot = reader.read(player, detected.orElseThrow());
-        counters.recordSnapshotRead();
-        if (snapshot.isEmpty()) {
-            session.clearLastSnapshot();
-            apply(session.renderPolicy().observe(Optional.empty(), true, now));
-            return;
-        }
+            Optional<SignSnapshot> snapshot = reader.read(player, detected.orElseThrow());
+            counters.recordSnapshotRead();
+            if (snapshot.isEmpty()) {
+                session.clearLastSnapshot();
+                apply(session.renderPolicy().observe(Optional.empty(), true, now));
+                return;
+            }
 
-        SignSnapshot value = snapshot.orElseThrow();
-        session.lastSnapshot(value);
-        counters.recordFormatterInvocation();
-        Optional<FormattedContent> formatted = formatter.format(value);
-        apply(session.renderPolicy().observe(formatted, true, now));
+            SignSnapshot value = snapshot.orElseThrow();
+            session.lastSnapshot(value);
+            counters.recordFormatterInvocation();
+            Optional<FormattedContent> formatted = formatter.format(value);
+            apply(session.renderPolicy().observe(formatted, true, now));
+        } finally {
+            counters.recordScan(System.nanoTime() - scanStarted);
+        }
     }
 
     private void apply(RenderDecision decision) {
