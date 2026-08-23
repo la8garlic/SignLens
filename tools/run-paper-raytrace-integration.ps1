@@ -117,10 +117,13 @@ try {
         throw "Paper ray-trace integration failed"
     }
 } finally {
-    if (-not $server.HasExited) {
+    if (-not $KeepServer -and -not $server.HasExited) {
         Stop-Process -Id $server.Id -Force
     }
     Write-Host "Paper integration logs: $serverRoot"
+    if ($KeepServer) {
+        Write-Host "Paper server kept running on port $PaperPort"
+    }
     if (-not $KeepServer -and (Test-Path -LiteralPath $serverRoot)) {
         Remove-Item -LiteralPath $serverRoot -Recurse -Force
     }

@@ -84,6 +84,10 @@ public final class PlayerSession {
         }
     }
 
+    public void taskRetired() {
+        scanTask = null;
+    }
+
     /** Resets all view/focus/render state after teleport, world change, or reload. */
     public RenderDecision reset() {
         focusController.reset();

@@ -1,8 +1,11 @@
 package io.github.la8garlic.signlens.integration;
 
+import io.github.la8garlic.signlens.SignLensPlugin;
 import io.github.la8garlic.signlens.detection.DetectedSign;
 import io.github.la8garlic.signlens.detection.RayTraceSignDetector;
+import io.github.la8garlic.signlens.focus.FocusState;
 import io.github.la8garlic.signlens.reading.PaperSignReader;
+import io.github.la8garlic.signlens.session.PlayerSession;
 import io.github.la8garlic.signlens.reading.SignSnapshot;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -136,6 +139,44 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
 
     private void finishReaderCases(Player player, Location signLocation, List<String> results) {
         boolean passed = results.stream().noneMatch(result -> result.contains("FAIL"));
+        getServer().getScheduler().runTaskLater(
+                this,
+                () -> recordRuntimePipeline(player, signLocation, results, passed),
+                20L
+        );
+    }
+
+    private void recordRuntimePipeline(
+            Player player,
+            Location signLocation,
+            List<String> results,
+            boolean previousCasesPassed
+    ) {
+        Block block = signLocation.getBlock();
+        block.setType(Material.OAK_SIGN);
+        Sign sign = (Sign) block.getState();
+        sign.getSide(Side.FRONT).line(0, Component.text("Runtime visible", NamedTextColor.GREEN));
+        sign.getSide(Side.FRONT).line(1, Component.text("ActionBar"));
+        sign.update(true, false);
+
+        player.teleport(new Location(player.getWorld(), 0.5, 300.0, 0.5, 0.0f, 0.0f));
+        getServer().getScheduler().runTaskLater(this, () -> finishRuntimePipeline(
+                player,
+                results,
+                previousCasesPassed
+        ), 20L);
+    }
+
+    private void finishRuntimePipeline(Player player, List<String> results, boolean previousCasesPassed) {
+        SignLensPlugin plugin = JavaPlugin.getPlugin(SignLensPlugin.class);
+        Optional<PlayerSession> session = plugin.sessions().find(player.getUniqueId());
+        boolean pipelinePassed = session.isPresent()
+                && session.orElseThrow().focusController().state() == FocusState.FOCUSED
+                && session.orElseThrow().lastSnapshot().isPresent()
+                && session.orElseThrow().renderPolicy().lastSentContent().isPresent();
+        results.add("RUNTIME_PIPELINE=" + (pipelinePassed ? "PASS" : "FAIL"));
+
+        boolean passed = previousCasesPassed && pipelinePassed;
         String result = (passed ? "PASS " : "FAIL ") + String.join("; ", results);
         getLogger().info("RAYTRACE_INTEGRATION " + result);
         writeResult(result);

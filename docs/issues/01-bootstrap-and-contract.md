@@ -41,7 +41,7 @@ Create the initial Gradle project and plugin descriptor for Paper 26.2 / Java 25
   - [x] Component formatter — [Issue #11](https://github.com/la8garlic/SignLens/issues/11)
   - [x] ActionBar renderer — [Issue #13](https://github.com/la8garlic/SignLens/issues/13)
   - [x] Session lifecycle — [Issue #15](https://github.com/la8garlic/SignLens/issues/15)
-  - [ ] Adaptive scan
+  - [x] Adaptive scan — [Issue #17](https://github.com/la8garlic/SignLens/issues/17)
   - [ ] Debug command
   - [ ] Performance validation
 

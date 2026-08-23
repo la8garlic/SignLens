@@ -39,6 +39,10 @@ On macOS/Linux:
 
 The plugin JAR is written to `build/libs/SignLens-0.1.0.jar`.
 
+To preview the runtime on a local Paper 26.2 server, run
+`./tools/run-paper-raytrace-integration.ps1 -KeepServer`; the temporary server
+stays available on `localhost:25565` after the automated probe completes.
+
 ## Runtime flow
 
 ```text
@@ -79,6 +83,8 @@ enabled: true
 detection:
   max-distance: 8.0
   scan-period-ticks: 2
+  position-threshold: 0.02
+  rotation-threshold-degrees: 1.0
 
 focus:
   dwell-millis: 200
@@ -87,6 +93,7 @@ focus:
 render:
   mode: action-bar
   separator: " · "
+  soft-limit: 96
   max-length: 120
   keepalive-millis: 2500
 
@@ -117,7 +124,7 @@ signlens.command.debug
 
 ## Project status
 
-This repository contains the 0.1 engineering specification and a locally validated Issue 01 Paper/Java bootstrap. Sign-reading runtime behavior is intentionally still deferred to Issues 02–10. See:
+This repository contains the 0.1 engineering specification and a locally validated Paper runtime path through Issue 08: detection, focus, sign reading, formatting, ActionBar rendering, player sessions, and adaptive scans. Debug tooling and performance release evidence remain in Issues 09–10. See:
 
 - [Architecture](docs/architecture.md)
 - [UX contract](docs/ux.md)

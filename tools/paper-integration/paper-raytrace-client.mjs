@@ -25,7 +25,7 @@ client.once("login", () => {
     setTimeout(() => {
         clearTimeout(timeout);
         client.end("integration probe complete");
-    }, 3_000);
+    }, 8_000);
 });
 
 client.once("end", () => {
