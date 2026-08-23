@@ -2,6 +2,8 @@ package io.github.la8garlic.signlens.integration;
 
 import io.github.la8garlic.signlens.detection.DetectedSign;
 import io.github.la8garlic.signlens.detection.RayTraceSignDetector;
+import io.github.la8garlic.signlens.reading.PaperSignReader;
+import io.github.la8garlic.signlens.reading.SignSnapshot;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,14 +12,22 @@ import java.util.List;
 import java.util.Optional;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.DyeColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.sign.SignSide;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
  * Test-only plugin that exercises the detector against a real Paper player.
@@ -96,10 +106,93 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
                 ? "PASS"
                 : "FAIL hit beyond range"));
 
+        getServer().getScheduler().runTaskLater(this, () -> recordReaderCases(player, signLocation, results), 1L);
+    }
+
+    private void recordReaderCases(Player player, Location signLocation, List<String> results) {
+        Block block = signLocation.getBlock();
+        for (Material material : SIGN_MATERIALS) {
+            block.setType(material);
+            Sign sign = (Sign) block.getState();
+            Component formattedFront = Component.text("Front", NamedTextColor.RED).decorate(TextDecoration.BOLD);
+            SignSide front = sign.getSide(Side.FRONT);
+            front.line(0, formattedFront);
+            front.line(1, Component.text("coloured"));
+            front.setColor(DyeColor.RED);
+            front.setGlowingText(true);
+
+            SignSide back = sign.getSide(Side.BACK);
+            back.line(0, Component.text("  "));
+            back.line(1, Component.text("\t"));
+            back.setColor(DyeColor.BLUE);
+            back.setGlowingText(false);
+            sign.update(true, false);
+
+            recordReaderForMaterial(player, block, material, results);
+        }
+
+        getServer().getScheduler().runTaskLater(this, () -> finishReaderCases(player, signLocation, results), 1L);
+    }
+
+    private void finishReaderCases(Player player, Location signLocation, List<String> results) {
         boolean passed = results.stream().noneMatch(result -> result.contains("FAIL"));
         String result = (passed ? "PASS " : "FAIL ") + String.join("; ", results);
         getLogger().info("RAYTRACE_INTEGRATION " + result);
         writeResult(result);
+    }
+
+    private void recordReaderForMaterial(
+            Player player,
+            Block block,
+            Material material,
+            List<String> results
+    ) {
+        Sign sign = (Sign) block.getState();
+        Location firstSideLocation = new Location(player.getWorld(), 0.5, 300.0, 0.5);
+        Location secondSideLocation = new Location(player.getWorld(), 0.5, 300.0, 6.5);
+        player.teleport(firstSideLocation);
+        Side firstSide = sign.getInteractableSideFor(player);
+        Optional<SignSnapshot> firstSnapshot = new PaperSignReader().read(
+                player,
+                new DetectedSign(player.getWorld().getUID(), block.getX(), block.getY(), block.getZ(), BlockFace.NORTH)
+        );
+
+        player.teleport(secondSideLocation);
+        Side secondSide = sign.getInteractableSideFor(player);
+        Optional<SignSnapshot> secondSnapshot = new PaperSignReader().read(
+                player,
+                new DetectedSign(player.getWorld().getUID(), block.getX(), block.getY(), block.getZ(), BlockFace.NORTH)
+        );
+
+        boolean sideChanged = firstSide != secondSide;
+        boolean firstMatches = matchesExpectedSide(firstSnapshot, firstSide, sign);
+        boolean secondMatches = matchesExpectedSide(secondSnapshot, secondSide, sign);
+        results.add(material.name() + "_READER="
+                + (sideChanged && firstMatches && secondMatches ? "PASS" : "FAIL"));
+    }
+
+    private boolean matchesExpectedSide(Optional<SignSnapshot> snapshot, Side side, Sign sign) {
+        if (snapshot.isEmpty() || snapshot.orElseThrow().key().side() != side) {
+            return false;
+        }
+
+        SignSnapshot value = snapshot.orElseThrow();
+        SignSide expected = sign.getSide(side);
+        String firstLine = PlainTextComponentSerializer.plainText().serialize(value.content().lines().get(0));
+        if (side == Side.FRONT) {
+            Component component = value.content().lines().get(0);
+            return firstLine.equals("Front")
+                    && NamedTextColor.RED.equals(component.style().color())
+                    && component.style().hasDecoration(TextDecoration.BOLD)
+                    && value.content().color() == expected.getColor()
+                    && value.content().glowingText() == expected.isGlowingText()
+                    && value.renderable();
+        }
+
+        return firstLine.isBlank()
+                && value.content().color() == expected.getColor()
+                && !value.content().glowingText()
+                && !value.renderable();
     }
 
     private void writeResult(String result) {

@@ -34,4 +34,4 @@ Child of Issue 01; consumes the detected sign from Issue 02.
 
 ## Verification
 
-Test a player on both sides of a sign and test colored, formatted, glowing, empty, and whitespace-only signs on Paper 26.2.
+Run `tools/run-paper-raytrace-integration.ps1` against Paper 26.2. The real-player probe reads both sides of standing, wall, hanging, and wall-hanging signs, preserving Adventure components while checking color, formatting, glowing metadata, empty/whitespace classification, and unavailable-state handling in unit tests.
