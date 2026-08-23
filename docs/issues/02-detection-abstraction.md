@@ -26,12 +26,12 @@ Child of Issue 01. Establishes the first boundary in `Detector -> FocusControlle
 
 ## Acceptance criteria
 
-- [ ] A ray aimed at a sign returns a detected sign.
-- [ ] A miss or non-sign block returns empty.
-- [ ] Detection respects the configured maximum distance.
-- [ ] Detection covers standing, wall, hanging, and wall-hanging sign block states.
-- [ ] Detector tests prove it does not call a nearby-block scan.
-- [ ] The detector has no renderer or scheduler dependency.
+- [x] A ray aimed at a sign returns a detected sign.
+- [x] A miss or non-sign block returns empty.
+- [x] Detection respects the configured maximum distance.
+- [x] Detection covers standing, wall, hanging, and wall-hanging sign block states.
+- [x] Detector tests prove it does not call a nearby-block scan.
+- [x] The detector has no renderer or scheduler dependency.
 
 ## Verification
 
