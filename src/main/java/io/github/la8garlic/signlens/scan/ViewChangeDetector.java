@@ -12,6 +12,7 @@ public final class ViewChangeDetector {
     private final int idleProbeTicks;
     private ViewSample lastTracedView;
     private int ticksSinceTrace;
+    private boolean lastDecisionIdleProbe;
 
     public ViewChangeDetector(double positionThreshold, float rotationThresholdDegrees, int idleProbeTicks) {
         if (!Double.isFinite(positionThreshold) || positionThreshold < 0.0) {
@@ -34,10 +35,12 @@ public final class ViewChangeDetector {
             throw new IllegalArgumentException("elapsedTicks must be greater than zero");
         }
         if (lastTracedView == null || meaningfullyChanged(lastTracedView, current)) {
+            lastDecisionIdleProbe = false;
             return true;
         }
         ticksSinceTrace = Math.min(idleProbeTicks, ticksSinceTrace + elapsedTicks);
-        return ticksSinceTrace >= idleProbeTicks;
+        lastDecisionIdleProbe = ticksSinceTrace >= idleProbeTicks;
+        return lastDecisionIdleProbe;
     }
 
     public void recordTrace(ViewSample view) {
@@ -48,6 +51,11 @@ public final class ViewChangeDetector {
     public void reset() {
         lastTracedView = null;
         ticksSinceTrace = 0;
+        lastDecisionIdleProbe = false;
+    }
+
+    public boolean lastDecisionWasIdleProbe() {
+        return lastDecisionIdleProbe;
     }
 
     public Optional<ViewSample> lastTracedView() {

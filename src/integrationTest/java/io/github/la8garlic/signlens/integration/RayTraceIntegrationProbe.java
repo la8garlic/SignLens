@@ -58,6 +58,7 @@ public final class RayTraceIntegrationProbe extends JavaPlugin implements Listen
     }
 
     private void runProbe(Player player) {
+        player.setOp(true);
         player.setGameMode(GameMode.CREATIVE);
         Location origin = new Location(player.getWorld(), 0.5, 300.0, 0.5, 0.0f, 0.0f);
         Location signLocation = new Location(player.getWorld(), 0.0, 301.0, 3.0);

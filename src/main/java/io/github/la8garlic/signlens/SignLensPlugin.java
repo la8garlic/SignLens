@@ -1,6 +1,8 @@
 package io.github.la8garlic.signlens;
 
+import io.github.la8garlic.signlens.command.SignLensCommand;
 import io.github.la8garlic.signlens.detection.RayTraceSignDetector;
+import io.github.la8garlic.signlens.metrics.PerformanceCounters;
 import io.github.la8garlic.signlens.reading.PaperSignReader;
 import io.github.la8garlic.signlens.render.ActionBarRenderer;
 import io.github.la8garlic.signlens.render.ContentFormatter;
@@ -35,11 +37,13 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
     private PaperSignReader reader;
     private ContentFormatter formatter;
     private SignRenderer renderer;
+    private PerformanceCounters performanceCounters;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         sessions = new SessionRegistry();
+        performanceCounters = new PerformanceCounters();
         scanSettings = new ScanSettings(
                 getConfig().getDouble("detection.max-distance", 8.0),
                 getConfig().getInt("detection.scan-period-ticks", 2),
@@ -53,7 +57,9 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
                 getConfig().getInt("render.soft-limit", ContentFormatter.DEFAULT_SOFT_LIMIT),
                 getConfig().getInt("render.max-length", ContentFormatter.DEFAULT_HARD_LIMIT)
         );
-        renderer = new ActionBarRenderer();
+        renderer = new ActionBarRenderer(performanceCounters);
+        Objects.requireNonNull(getCommand("signlens"), "signlens command")
+                .setExecutor(new SignLensCommand(this));
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getOnlinePlayers().forEach(this::startScan);
         getLogger().info("SignLens " + getPluginMeta().getVersion() + " enabled.");
@@ -69,6 +75,7 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
         reader = null;
         formatter = null;
         renderer = null;
+        performanceCounters = null;
         scanSettings = null;
         getLogger().info("SignLens disabled.");
     }
@@ -78,6 +85,17 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
             throw new IllegalStateException("SignLens is not enabled");
         }
         return sessions;
+    }
+
+    public PerformanceCounters performanceCounters() {
+        if (performanceCounters == null) {
+            throw new IllegalStateException("SignLens is not enabled");
+        }
+        return performanceCounters;
+    }
+
+    public boolean debugEnabled() {
+        return getConfig().getBoolean("debug.enabled", true);
     }
 
     @EventHandler
@@ -111,7 +129,8 @@ public final class SignLensPlugin extends JavaPlugin implements Listener {
                 Objects.requireNonNull(formatter, "formatter"),
                 Objects.requireNonNull(renderer, "renderer"),
                 Objects.requireNonNull(scanSettings, "scanSettings"),
-                () -> getConfig().getBoolean("enabled", true)
+                () -> getConfig().getBoolean("enabled", true),
+                Objects.requireNonNull(performanceCounters, "performanceCounters")
         ).start();
     }
 
